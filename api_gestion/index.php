@@ -15,6 +15,8 @@ require_once __DIR__ . '/repositorios/IRepositorioPrograma.php';
 require_once __DIR__ . '/servicios/IServicioPrograma.php';
 require_once __DIR__ . '/repositorios/IRepositorioRed.php';
 require_once __DIR__ . '/servicios/IServicioRed.php';
+require_once __DIR__ . '/repositorios/IRepositorioLineaInvestigacion.php';
+require_once __DIR__ . '/servicios/IServicioLineaInvestigacion.php';
 
 // Repositorios
 require_once __DIR__ . '/repositorios/RepositorioProgramaMariaDB.php';
@@ -34,6 +36,7 @@ require_once __DIR__ . '/servicios/ensamblador.php';
 // Controladores
 require_once __DIR__ . '/controladores/ControladorPrograma.php';
 require_once __DIR__ . '/controladores/ControladorRed.php';
+require_once __DIR__ . '/controladores/ControladorLineaInvestigacion.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -122,14 +125,26 @@ if (isset($partes[0], $partes[1]) && $partes[0] === 'api') {
             break;
 
         case 'linea-investigacion':
-            $servicio = obtenerServicioLineaInvestigacion($conexion);
+            $controlador = new ApiGestion\Controladores\ControladorLineaInvestigacion(obtenerServicioLineaInvestigacion($conexion));
+            $id = isset($partes[2]) ? (int)$partes[2] : null;
+
             if ($metodo === 'GET') {
-                $datos = array_map(fn($l) => $l->toArray(), $servicio->obtenerTodos($limite));
-                echo json_encode(['tabla' => 'linea_investigacion', 'limite' => $limite, 'total' => count($datos), 'datos' => $datos], JSON_UNESCAPED_UNICODE);
+                $id !== null ? $controlador->obtenerUno($id) : $controlador->listar($_GET);
+            } elseif ($metodo === 'POST') {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->crear($cuerpo);
+            } elseif ($metodo === 'PUT' && $id !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->reemplazar($id, $cuerpo);
+            } elseif ($metodo === 'PATCH' && $id !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->actualizarParcial($id, $cuerpo);
+            } elseif ($metodo === 'DELETE' && $id !== null) {
+                $controlador->eliminar($id);
             }
             break;
 
-                case 'red':
+        case 'red':
             $controlador = new ApiGestion\Controladores\ControladorRed(obtenerServicioRed($conexion));
             $id = isset($partes[2]) ? (int)$partes[2] : null;
 
@@ -148,7 +163,7 @@ if (isset($partes[0], $partes[1]) && $partes[0] === 'api') {
                 $controlador->eliminar($id);
             }
             break;
-            
+
 
         default:
             http_response_code(404);
