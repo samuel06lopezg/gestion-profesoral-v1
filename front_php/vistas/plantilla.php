@@ -20,6 +20,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/redes">Redes Académicas</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/lineas">Líneas de Investigación</a>
+                </li>
             </ul>
         </div>
     </div>

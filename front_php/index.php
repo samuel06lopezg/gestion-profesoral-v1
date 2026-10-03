@@ -147,6 +147,71 @@ if ($uri === '/' || $uri === '') {
         header('Location: /redes?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la red.'));
     }
     exit;
+} elseif ($uri === '/lineas') {
+    $respuesta = listar_lineas();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $lineas = [];
+    } else {
+        $lineas = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_lineas.php';
+} elseif ($uri === '/lineas/nueva') {
+    $linea = [];
+    $errores = [];
+    $esEdicion = false;
+    require __DIR__ . '/vistas/formulario_linea.php';
+} elseif ($uri === '/lineas/crear' && $metodo === 'POST') {
+    $res = crear_linea($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /lineas?exito=' . urlencode('Línea de investigación creada correctamente.'));
+        exit;
+    } else {
+        $linea = $_POST;
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al crear la línea.'];
+        $esEdicion = false;
+        require __DIR__ . '/vistas/formulario_linea.php';
+    }
+} elseif ($uri === '/lineas/editar') {
+    $id = (int)($_GET['id'] ?? 0);
+    $linea = obtener_linea($id);
+    if (isset($linea['error']) || (isset($linea['estado']) && $linea['estado'] === 404)) {
+        header('Location: /lineas?error=' . urlencode('La línea seleccionada no existe.'));
+        exit;
+    }
+    $errores = [];
+    $esEdicion = true;
+    require __DIR__ . '/vistas/formulario_linea.php';
+} elseif ($uri === '/lineas/guardar-edicion' && $metodo === 'POST') {
+    $id = (int)($_POST['id'] ?? 0);
+    $accion = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_linea($id, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['id'], $datos['accion']);
+        $res = actualizar_parcial_linea($id, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /lineas?exito=' . urlencode('Línea de investigación modificada correctamente.'));
+        exit;
+    } else {
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar la línea.'];
+        $linea = $_POST;
+        $esEdicion = true;
+        require __DIR__ . '/vistas/formulario_linea.php';
+    }
+} elseif ($uri === '/lineas/retirar' && $metodo === 'POST') {
+    $id = (int)($_POST['id'] ?? 0);
+    $res = retirar_linea($id);
+    if ($res['codigo'] === 200) {
+        header('Location: /lineas?exito=' . urlencode('Línea de investigación retirada con éxito.'));
+    } else {
+        header('Location: /lineas?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la línea.'));
+    }
+    exit;
 } else {
     http_response_code(404);
     require __DIR__ . '/vistas/no_encontrada.php';

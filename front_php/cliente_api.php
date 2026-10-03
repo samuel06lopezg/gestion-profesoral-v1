@@ -235,3 +235,104 @@ function retirar_red(int $idr): array
 
     return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
 }
+
+// ───────────── LÍNEA DE INVESTIGACIÓN ─────────────
+
+function listar_lineas(int $limite = 1000): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/linea-investigacion?limite=' . $limite);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo establecer conexión con el servidor de la API.'];
+    }
+    if ($codigoHttp === 204) {
+        return ['tabla' => 'linea_investigacion', 'total' => 0, 'datos' => []];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function obtener_linea(int $id): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/linea-investigacion/' . $id);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'Sin conexión con la API.'];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function crear_linea(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/linea-investigacion');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function reemplazar_linea(int $id, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/linea-investigacion/' . $id);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PUT',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function actualizar_parcial_linea(int $id, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/linea-investigacion/' . $id);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PATCH',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_linea(int $id): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/linea-investigacion/' . $id);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
