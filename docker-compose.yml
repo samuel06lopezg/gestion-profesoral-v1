@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # 1. Motor de Base de Datos
+  mariadb:
+    image: mariadb:11
+    container_name: mariadb_gestion
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gestion_profesoral
+    ports:
+      - "13331:3306"
+    volumes:
+      # Carga el script de inicialización con las 191 filas sembradas
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  # 2. Servicio API REST
+  api_gestion:
+    build:
+      context: ./api_gestion
+      dockerfile: Dockerfile
+    container_name: api_gestion_v1
+    restart: always
+    ports:
+      - "8113:8113"
+    environment:
+      MYSQL_HOST: mariadb
+      MYSQL_DATABASE: gestion_profesoral
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_PORT: 3306
+    depends_on:
+      - mariadb
+
+  # 3. Servicio Frontend PHP
+  front_php:
+    build:
+      context: ./front_php
+      dockerfile: Dockerfile
+    container_name: front_php_v1
+    restart: always
+    ports:
+      - "8112:8112"
+    environment:
+      API_BASE_URL: http://api_gestion:8113
+    depends_on:
+      - api_gestion
