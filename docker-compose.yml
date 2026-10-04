@@ -7,8 +7,8 @@ services:
     container_name: mariadb_gestion
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: gestion_profesoral
+       MYSQL_ROOT_PASSWORD: ${DB_CLAVE}
+       MYSQL_DATABASE: ${DB_NOMBRE}
     ports:
       - "13331:3306"
     volumes:
@@ -26,9 +26,9 @@ services:
       - "8113:8113"
     environment:
       MYSQL_HOST: mariadb
-      MYSQL_DATABASE: gestion_profesoral
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NOMBRE}
+      MYSQL_USER: ${DB_USUARIO}
+      MYSQL_PASSWORD: ${DB_CLAVE}
       MYSQL_PORT: 3306
     depends_on:
       - mariadb

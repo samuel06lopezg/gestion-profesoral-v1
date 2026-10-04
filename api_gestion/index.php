@@ -50,7 +50,7 @@ header('Content-Type: application/json; charset=utf-8');
 $host     = getenv('MYSQL_HOST') ?: 'mariadb';
 $db       = getenv('MYSQL_DATABASE') ?: 'gestion_profesoral';
 $user     = getenv('MYSQL_USER') ?: 'root';
-$pass     = getenv('MYSQL_PASSWORD') ?: 'root';
+$pass     = getenv('MYSQL_PASSWORD') ?: '';
 $port     = getenv('MYSQL_PORT') ?: '3306';
 
 try {
