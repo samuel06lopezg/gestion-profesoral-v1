@@ -17,6 +17,8 @@ require_once __DIR__ . '/repositorios/IRepositorioRed.php';
 require_once __DIR__ . '/servicios/IServicioRed.php';
 require_once __DIR__ . '/repositorios/IRepositorioLineaInvestigacion.php';
 require_once __DIR__ . '/servicios/IServicioLineaInvestigacion.php';
+require_once __DIR__ . '/repositorios/IRepositorioTerminoClave.php';
+require_once __DIR__ . '/servicios/IServicioTerminoClave.php';
 
 // Repositorios
 require_once __DIR__ . '/repositorios/RepositorioProgramaMariaDB.php';
@@ -37,6 +39,7 @@ require_once __DIR__ . '/servicios/ensamblador.php';
 require_once __DIR__ . '/controladores/ControladorPrograma.php';
 require_once __DIR__ . '/controladores/ControladorRed.php';
 require_once __DIR__ . '/controladores/ControladorLineaInvestigacion.php';
+require_once __DIR__ . '/controladores/ControladorTerminoClave.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -116,11 +119,24 @@ if (isset($partes[0], $partes[1]) && $partes[0] === 'api') {
             }
             break;
 
-        case 'termino-clave':
-            $servicio = obtenerServicioTerminoClave($conexion);
+                case 'termino-clave':
+            $controlador = new ApiGestion\Controladores\ControladorTerminoClave(obtenerServicioTerminoClave($conexion));
+            // La llave es TEXTO y llega codificada en la dirección (espacio = %20): se decodifica
+            $termino = isset($partes[2]) ? urldecode($partes[2]) : null;
+
             if ($metodo === 'GET') {
-                $datos = array_map(fn($t) => $t->toArray(), $servicio->obtenerTodos($limite));
-                echo json_encode(['tabla' => 'termino_clave', 'limite' => $limite, 'total' => count($datos), 'datos' => $datos], JSON_UNESCAPED_UNICODE);
+                $termino !== null ? $controlador->obtenerUno($termino) : $controlador->listar($_GET);
+            } elseif ($metodo === 'POST') {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->crear($cuerpo);
+            } elseif ($metodo === 'PUT' && $termino !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->reemplazar($termino, $cuerpo);
+            } elseif ($metodo === 'PATCH' && $termino !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->actualizarParcial($termino, $cuerpo);
+            } elseif ($metodo === 'DELETE' && $termino !== null) {
+                $controlador->eliminar($termino);
             }
             break;
 

@@ -336,3 +336,105 @@ function retirar_linea(int $id): array
 
     return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
 }
+
+
+// ───────────── TÉRMINO CLAVE ─────────────
+
+function listar_terminos(int $limite = 1000): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/termino-clave?limite=' . $limite);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo establecer conexión con el servidor de la API.'];
+    }
+    if ($codigoHttp === 204) {
+        return ['tabla' => 'termino_clave', 'total' => 0, 'datos' => []];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function obtener_termino(string $termino): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/termino-clave/' . rawurlencode($termino));
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'Sin conexión con la API.'];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function crear_termino(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/termino-clave');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function reemplazar_termino(string $termino, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/termino-clave/' . rawurlencode($termino));
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PUT',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function actualizar_parcial_termino(string $termino, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/termino-clave/' . rawurlencode($termino));
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PATCH',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_termino(string $termino): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/termino-clave/' . rawurlencode($termino));
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}

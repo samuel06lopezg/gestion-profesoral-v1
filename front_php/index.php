@@ -212,6 +212,71 @@ if ($uri === '/' || $uri === '') {
         header('Location: /lineas?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la línea.'));
     }
     exit;
+} elseif ($uri === '/terminos') {
+    $respuesta = listar_terminos();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $terminos = [];
+    } else {
+        $terminos = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_terminos.php';
+} elseif ($uri === '/terminos/nuevo') {
+    $termino = [];
+    $errores = [];
+    $esEdicion = false;
+    require __DIR__ . '/vistas/formulario_termino.php';
+} elseif ($uri === '/terminos/crear' && $metodo === 'POST') {
+    $res = crear_termino($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /terminos?exito=' . urlencode('Término clave creado correctamente.'));
+        exit;
+    } else {
+        $termino = $_POST;
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al crear el término.'];
+        $esEdicion = false;
+        require __DIR__ . '/vistas/formulario_termino.php';
+    }
+} elseif ($uri === '/terminos/editar') {
+    $clave = (string)($_GET['termino'] ?? '');
+    $termino = obtener_termino($clave);
+    if (isset($termino['error']) || (isset($termino['estado']) && $termino['estado'] === 404)) {
+        header('Location: /terminos?error=' . urlencode('El término seleccionado no existe.'));
+        exit;
+    }
+    $errores = [];
+    $esEdicion = true;
+    require __DIR__ . '/vistas/formulario_termino.php';
+} elseif ($uri === '/terminos/guardar-edicion' && $metodo === 'POST') {
+    $clave = (string)($_POST['termino'] ?? '');
+    $accion = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_termino($clave, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['termino'], $datos['accion']);
+        $res = actualizar_parcial_termino($clave, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /terminos?exito=' . urlencode('Término clave modificado correctamente.'));
+        exit;
+    } else {
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar el término.'];
+        $termino = $_POST;
+        $esEdicion = true;
+        require __DIR__ . '/vistas/formulario_termino.php';
+    }
+} elseif ($uri === '/terminos/retirar' && $metodo === 'POST') {
+    $clave = (string)($_POST['termino'] ?? '');
+    $res = retirar_termino($clave);
+    if ($res['codigo'] === 200) {
+        header('Location: /terminos?exito=' . urlencode('Término clave retirado con éxito.'));
+    } else {
+        header('Location: /terminos?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar el término.'));
+    }
+    exit;
 } else {
     http_response_code(404);
     require __DIR__ . '/vistas/no_encontrada.php';
