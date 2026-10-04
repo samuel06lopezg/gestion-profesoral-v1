@@ -26,6 +26,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/terminos">Términos Clave</a>
                 </li>
+                <li class="nav-item">
+                     <a class="nav-link" href="/areas">Áreas de Conocimiento</a>
+                </li>
             </ul>
         </div>
     </div>

@@ -277,6 +277,73 @@ if ($uri === '/' || $uri === '') {
         header('Location: /terminos?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar el término.'));
     }
     exit;
+
+    } elseif ($uri === '/areas') {
+    $respuesta = listar_areas();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $areas = [];
+    } else {
+        $areas = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_areas.php';
+} elseif ($uri === '/areas/nueva') {
+    $area = [];
+    $errores = [];
+    $esEdicion = false;
+    require __DIR__ . '/vistas/formulario_area.php';
+} elseif ($uri === '/areas/crear' && $metodo === 'POST') {
+    $res = crear_area($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /areas?exito=' . urlencode('Área de conocimiento creada correctamente.'));
+        exit;
+    } else {
+        $area = $_POST;
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al crear el área.'];
+        $esEdicion = false;
+        require __DIR__ . '/vistas/formulario_area.php';
+    }
+} elseif ($uri === '/areas/editar') {
+    $clave = (string)($_GET['id'] ?? '');
+    $area = obtener_area($clave);
+    if (isset($area['error']) || (isset($area['estado']) && $area['estado'] === 404)) {
+        header('Location: /areas?error=' . urlencode('El área seleccionada no existe.'));
+        exit;
+    }
+    $errores = [];
+    $esEdicion = true;
+    require __DIR__ . '/vistas/formulario_area.php';
+} elseif ($uri === '/areas/guardar-edicion' && $metodo === 'POST') {
+    $clave = (string)($_POST['id'] ?? '');
+    $accion = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_area($clave, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['id'], $datos['accion']);
+        $res = actualizar_parcial_area($clave, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /areas?exito=' . urlencode('Área de conocimiento modificada correctamente.'));
+        exit;
+    } else {
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar el área.'];
+        $area = $_POST;
+        $esEdicion = true;
+        require __DIR__ . '/vistas/formulario_area.php';
+    }
+} elseif ($uri === '/areas/retirar' && $metodo === 'POST') {
+    $clave = (string)($_POST['id'] ?? '');
+    $res = retirar_area($clave);
+    if ($res['codigo'] === 200) {
+        header('Location: /areas?exito=' . urlencode('Área de conocimiento retirada con éxito.'));
+    } else {
+        header('Location: /areas?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar el área.'));
+    }
+    exit;
+    
 } else {
     http_response_code(404);
     require __DIR__ . '/vistas/no_encontrada.php';
