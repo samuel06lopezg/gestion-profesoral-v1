@@ -6,7 +6,7 @@ namespace ApiGestion\Modelos;
 class AreaConocimiento
 {
     public function __construct(
-        public int $id,
+        public string $id,
         public string $granArea,
         public string $area,
         public string $disciplina

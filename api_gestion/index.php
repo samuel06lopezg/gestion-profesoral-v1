@@ -15,6 +15,12 @@ require_once __DIR__ . '/repositorios/IRepositorioPrograma.php';
 require_once __DIR__ . '/servicios/IServicioPrograma.php';
 require_once __DIR__ . '/repositorios/IRepositorioRed.php';
 require_once __DIR__ . '/servicios/IServicioRed.php';
+require_once __DIR__ . '/repositorios/IRepositorioLineaInvestigacion.php';
+require_once __DIR__ . '/servicios/IServicioLineaInvestigacion.php';
+require_once __DIR__ . '/repositorios/IRepositorioTerminoClave.php';
+require_once __DIR__ . '/servicios/IServicioTerminoClave.php';
+require_once __DIR__ . '/repositorios/IRepositorioAreaConocimiento.php';
+require_once __DIR__ . '/servicios/IServicioAreaConocimiento.php';
 
 // Repositorios
 require_once __DIR__ . '/repositorios/RepositorioProgramaMariaDB.php';
@@ -34,6 +40,9 @@ require_once __DIR__ . '/servicios/ensamblador.php';
 // Controladores
 require_once __DIR__ . '/controladores/ControladorPrograma.php';
 require_once __DIR__ . '/controladores/ControladorRed.php';
+require_once __DIR__ . '/controladores/ControladorLineaInvestigacion.php';
+require_once __DIR__ . '/controladores/ControladorTerminoClave.php';
+require_once __DIR__ . '/controladores/ControladorAreaConocimiento.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -41,7 +50,7 @@ header('Content-Type: application/json; charset=utf-8');
 $host     = getenv('MYSQL_HOST') ?: 'mariadb';
 $db       = getenv('MYSQL_DATABASE') ?: 'gestion_profesoral';
 $user     = getenv('MYSQL_USER') ?: 'root';
-$pass     = getenv('MYSQL_PASSWORD') ?: 'root';
+$pass     = getenv('MYSQL_PASSWORD') ?: '';
 $port     = getenv('MYSQL_PORT') ?: '3306';
 
 try {
@@ -105,31 +114,69 @@ if (isset($partes[0], $partes[1]) && $partes[0] === 'api') {
             }
             break;
 
-        case 'area-conocimiento':
-            $servicio = obtenerServicioAreaConocimiento($conexion);
+             case 'area-conocimiento':
+            $controlador = new ApiGestion\Controladores\ControladorAreaConocimiento(obtenerServicioAreaConocimiento($conexion));
+            // La llave es TEXTO (por ejemplo 1A01) y llega codificada en la dirección
+            $id = isset($partes[2]) ? urldecode($partes[2]) : null;
+
             if ($metodo === 'GET') {
-                $datos = array_map(fn($a) => $a->toArray(), $servicio->obtenerTodos($limite));
-                echo json_encode(['tabla' => 'area_conocimiento', 'limite' => $limite, 'total' => count($datos), 'datos' => $datos], JSON_UNESCAPED_UNICODE);
+                $id !== null ? $controlador->obtenerUno($id) : $controlador->listar($_GET);
+            } elseif ($metodo === 'POST') {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->crear($cuerpo);
+            } elseif ($metodo === 'PUT' && $id !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->reemplazar($id, $cuerpo);
+            } elseif ($metodo === 'PATCH' && $id !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->actualizarParcial($id, $cuerpo);
+            } elseif ($metodo === 'DELETE' && $id !== null) {
+                $controlador->eliminar($id);
             }
             break;
 
-        case 'termino-clave':
-            $servicio = obtenerServicioTerminoClave($conexion);
+                case 'termino-clave':
+            $controlador = new ApiGestion\Controladores\ControladorTerminoClave(obtenerServicioTerminoClave($conexion));
+            // La llave es TEXTO y llega codificada en la dirección (espacio = %20): se decodifica
+            $termino = isset($partes[2]) ? urldecode($partes[2]) : null;
+
             if ($metodo === 'GET') {
-                $datos = array_map(fn($t) => $t->toArray(), $servicio->obtenerTodos($limite));
-                echo json_encode(['tabla' => 'termino_clave', 'limite' => $limite, 'total' => count($datos), 'datos' => $datos], JSON_UNESCAPED_UNICODE);
+                $termino !== null ? $controlador->obtenerUno($termino) : $controlador->listar($_GET);
+            } elseif ($metodo === 'POST') {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->crear($cuerpo);
+            } elseif ($metodo === 'PUT' && $termino !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->reemplazar($termino, $cuerpo);
+            } elseif ($metodo === 'PATCH' && $termino !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->actualizarParcial($termino, $cuerpo);
+            } elseif ($metodo === 'DELETE' && $termino !== null) {
+                $controlador->eliminar($termino);
             }
             break;
 
         case 'linea-investigacion':
-            $servicio = obtenerServicioLineaInvestigacion($conexion);
+            $controlador = new ApiGestion\Controladores\ControladorLineaInvestigacion(obtenerServicioLineaInvestigacion($conexion));
+            $id = isset($partes[2]) ? (int)$partes[2] : null;
+
             if ($metodo === 'GET') {
-                $datos = array_map(fn($l) => $l->toArray(), $servicio->obtenerTodos($limite));
-                echo json_encode(['tabla' => 'linea_investigacion', 'limite' => $limite, 'total' => count($datos), 'datos' => $datos], JSON_UNESCAPED_UNICODE);
+                $id !== null ? $controlador->obtenerUno($id) : $controlador->listar($_GET);
+            } elseif ($metodo === 'POST') {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->crear($cuerpo);
+            } elseif ($metodo === 'PUT' && $id !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->reemplazar($id, $cuerpo);
+            } elseif ($metodo === 'PATCH' && $id !== null) {
+                $cuerpo = json_decode(file_get_contents('php://input'), true) ?? [];
+                $controlador->actualizarParcial($id, $cuerpo);
+            } elseif ($metodo === 'DELETE' && $id !== null) {
+                $controlador->eliminar($id);
             }
             break;
 
-                case 'red':
+        case 'red':
             $controlador = new ApiGestion\Controladores\ControladorRed(obtenerServicioRed($conexion));
             $id = isset($partes[2]) ? (int)$partes[2] : null;
 
@@ -148,7 +195,7 @@ if (isset($partes[0], $partes[1]) && $partes[0] === 'api') {
                 $controlador->eliminar($id);
             }
             break;
-            
+
 
         default:
             http_response_code(404);

@@ -147,6 +147,203 @@ if ($uri === '/' || $uri === '') {
         header('Location: /redes?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la red.'));
     }
     exit;
+} elseif ($uri === '/lineas') {
+    $respuesta = listar_lineas();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $lineas = [];
+    } else {
+        $lineas = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_lineas.php';
+} elseif ($uri === '/lineas/nueva') {
+    $linea = [];
+    $errores = [];
+    $esEdicion = false;
+    require __DIR__ . '/vistas/formulario_linea.php';
+} elseif ($uri === '/lineas/crear' && $metodo === 'POST') {
+    $res = crear_linea($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /lineas?exito=' . urlencode('Línea de investigación creada correctamente.'));
+        exit;
+    } else {
+        $linea = $_POST;
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al crear la línea.'];
+        $esEdicion = false;
+        require __DIR__ . '/vistas/formulario_linea.php';
+    }
+} elseif ($uri === '/lineas/editar') {
+    $id = (int)($_GET['id'] ?? 0);
+    $linea = obtener_linea($id);
+    if (isset($linea['error']) || (isset($linea['estado']) && $linea['estado'] === 404)) {
+        header('Location: /lineas?error=' . urlencode('La línea seleccionada no existe.'));
+        exit;
+    }
+    $errores = [];
+    $esEdicion = true;
+    require __DIR__ . '/vistas/formulario_linea.php';
+} elseif ($uri === '/lineas/guardar-edicion' && $metodo === 'POST') {
+    $id = (int)($_POST['id'] ?? 0);
+    $accion = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_linea($id, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['id'], $datos['accion']);
+        $res = actualizar_parcial_linea($id, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /lineas?exito=' . urlencode('Línea de investigación modificada correctamente.'));
+        exit;
+    } else {
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar la línea.'];
+        $linea = $_POST;
+        $esEdicion = true;
+        require __DIR__ . '/vistas/formulario_linea.php';
+    }
+} elseif ($uri === '/lineas/retirar' && $metodo === 'POST') {
+    $id = (int)($_POST['id'] ?? 0);
+    $res = retirar_linea($id);
+    if ($res['codigo'] === 200) {
+        header('Location: /lineas?exito=' . urlencode('Línea de investigación retirada con éxito.'));
+    } else {
+        header('Location: /lineas?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la línea.'));
+    }
+    exit;
+} elseif ($uri === '/terminos') {
+    $respuesta = listar_terminos();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $terminos = [];
+    } else {
+        $terminos = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_terminos.php';
+} elseif ($uri === '/terminos/nuevo') {
+    $termino = [];
+    $errores = [];
+    $esEdicion = false;
+    require __DIR__ . '/vistas/formulario_termino.php';
+} elseif ($uri === '/terminos/crear' && $metodo === 'POST') {
+    $res = crear_termino($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /terminos?exito=' . urlencode('Término clave creado correctamente.'));
+        exit;
+    } else {
+        $termino = $_POST;
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al crear el término.'];
+        $esEdicion = false;
+        require __DIR__ . '/vistas/formulario_termino.php';
+    }
+} elseif ($uri === '/terminos/editar') {
+    $clave = (string)($_GET['termino'] ?? '');
+    $termino = obtener_termino($clave);
+    if (isset($termino['error']) || (isset($termino['estado']) && $termino['estado'] === 404)) {
+        header('Location: /terminos?error=' . urlencode('El término seleccionado no existe.'));
+        exit;
+    }
+    $errores = [];
+    $esEdicion = true;
+    require __DIR__ . '/vistas/formulario_termino.php';
+} elseif ($uri === '/terminos/guardar-edicion' && $metodo === 'POST') {
+    $clave = (string)($_POST['termino'] ?? '');
+    $accion = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_termino($clave, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['termino'], $datos['accion']);
+        $res = actualizar_parcial_termino($clave, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /terminos?exito=' . urlencode('Término clave modificado correctamente.'));
+        exit;
+    } else {
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar el término.'];
+        $termino = $_POST;
+        $esEdicion = true;
+        require __DIR__ . '/vistas/formulario_termino.php';
+    }
+} elseif ($uri === '/terminos/retirar' && $metodo === 'POST') {
+    $clave = (string)($_POST['termino'] ?? '');
+    $res = retirar_termino($clave);
+    if ($res['codigo'] === 200) {
+        header('Location: /terminos?exito=' . urlencode('Término clave retirado con éxito.'));
+    } else {
+        header('Location: /terminos?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar el término.'));
+    }
+    exit;
+
+    } elseif ($uri === '/areas') {
+    $respuesta = listar_areas();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $areas = [];
+    } else {
+        $areas = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_areas.php';
+} elseif ($uri === '/areas/nueva') {
+    $area = [];
+    $errores = [];
+    $esEdicion = false;
+    require __DIR__ . '/vistas/formulario_area.php';
+} elseif ($uri === '/areas/crear' && $metodo === 'POST') {
+    $res = crear_area($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /areas?exito=' . urlencode('Área de conocimiento creada correctamente.'));
+        exit;
+    } else {
+        $area = $_POST;
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al crear el área.'];
+        $esEdicion = false;
+        require __DIR__ . '/vistas/formulario_area.php';
+    }
+} elseif ($uri === '/areas/editar') {
+    $clave = (string)($_GET['id'] ?? '');
+    $area = obtener_area($clave);
+    if (isset($area['error']) || (isset($area['estado']) && $area['estado'] === 404)) {
+        header('Location: /areas?error=' . urlencode('El área seleccionada no existe.'));
+        exit;
+    }
+    $errores = [];
+    $esEdicion = true;
+    require __DIR__ . '/vistas/formulario_area.php';
+} elseif ($uri === '/areas/guardar-edicion' && $metodo === 'POST') {
+    $clave = (string)($_POST['id'] ?? '');
+    $accion = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_area($clave, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['id'], $datos['accion']);
+        $res = actualizar_parcial_area($clave, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /areas?exito=' . urlencode('Área de conocimiento modificada correctamente.'));
+        exit;
+    } else {
+        $errores = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar el área.'];
+        $area = $_POST;
+        $esEdicion = true;
+        require __DIR__ . '/vistas/formulario_area.php';
+    }
+} elseif ($uri === '/areas/retirar' && $metodo === 'POST') {
+    $clave = (string)($_POST['id'] ?? '');
+    $res = retirar_area($clave);
+    if ($res['codigo'] === 200) {
+        header('Location: /areas?exito=' . urlencode('Área de conocimiento retirada con éxito.'));
+    } else {
+        header('Location: /areas?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar el área.'));
+    }
+    exit;
+    
 } else {
     http_response_code(404);
     require __DIR__ . '/vistas/no_encontrada.php';
