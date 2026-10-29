@@ -10,6 +10,8 @@
 --   [C4] red.url: VARCHAR(45) -> VARCHAR(255). Una dirección web real no cabe en 45.
 --   [C5] 'activo BOOLEAN NOT NULL DEFAULT TRUE' en las tablas del módulo: el borrado es LÓGICO.
 --   [C6] Se corrige 'Cienias Naturales' -> 'Ciencias Naturales' (error de digitación del Excel).
+--   [C7] estudios_realizados.id: INT -> INT AUTO_INCREMENT para soporte de inserción en maestro-detalle.
+--   [C8] Procedimientos almacenados para maestro-detalle (docente y estudios_realizados) con regla de integridad en sp_eliminar_docente.
 --
 -- DATOS: las 218 filas de area_conocimiento y las 191 de programa se tomaron del
 -- init.sql del repositorio guía del profesor (proyecto_php_gestion_profesoral1),
@@ -113,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `docente` (
 
 -- Tabla: estudios_realizados
 CREATE TABLE IF NOT EXISTS `estudios_realizados` (
-    `id` INT NOT NULL,
+    `id` INT NOT NULL AUTO_INCREMENT, -- [C7] AUTO_INCREMENT para inserción fluida en maestro-detalle
     `titulo` VARCHAR(45) NOT NULL,
     `universidad` VARCHAR(50) NOT NULL,
     `fecha` DATE NOT NULL,
@@ -705,3 +707,207 @@ INSERT INTO programa (id, nombre, tipo, nivel, fecha_creacion,
     (40608, 'Maestría en Psicología Clinica', 'Programa Académico', 'Maestría', 'sin dato', NULL, 'sin dato', 'sin dato', 'sin dato', 'Medellín', 406),
     (40609, 'Maestría en Psicología de las Organizaciones y del Trabajo', 'Programa Académico', 'Maestría', 'sin dato', NULL, 'sin dato', 'sin dato', 'sin dato', 'Medellín', 406),
     (40610, 'Doctorado en Psicología', 'Programa Académico', 'Doctorado', 'sin dato', NULL, 'sin dato', 'sin dato', 'sin dato', 'Medellín', 406);
+
+-- =============================================================================
+-- PROCEDIMIENTOS ALMACENADOS (V2 — Maestro: docente, Detalle: estudios_realizados)
+-- =============================================================================
+
+DELIMITER $$
+
+-- 1. Listar docentes activos
+CREATE OR REPLACE PROCEDURE sp_listar_docente()
+BEGIN
+    SELECT * FROM docente WHERE activo = 1 ORDER BY apellidos, nombres;
+END$$
+
+-- 2. Consultar docente por cédula
+CREATE OR REPLACE PROCEDURE sp_consultar_docente(
+    IN p_cedula INT
+)
+BEGIN
+    SELECT * FROM docente WHERE cedula = p_cedula AND activo = 1;
+END$$
+
+-- 3. Crear docente
+CREATE OR REPLACE PROCEDURE sp_crear_docente(
+    IN p_cedula INT,
+    IN p_nombres VARCHAR(60),
+    IN p_apellidos VARCHAR(60),
+    IN p_genero VARCHAR(12),
+    IN p_cargo VARCHAR(30),
+    IN p_fecha_nacimiento DATE,
+    IN p_correo VARCHAR(70),
+    IN p_telefono VARCHAR(20),
+    IN p_url_cvlac VARCHAR(128),
+    IN p_fecha_actualizacion DATE,
+    IN p_escalafon VARCHAR(45),
+    IN p_perfil LONGTEXT,
+    IN p_cat_minciencia VARCHAR(45),
+    IN p_conv_minciencia VARCHAR(45),
+    IN p_nacionalidaad VARCHAR(45),
+    IN p_linea_investigacion_principal INT
+)
+BEGIN
+    INSERT INTO docente (
+        cedula, nombres, apellidos, genero, cargo, fecha_nacimiento,
+        correo, telefono, url_cvlac, fecha_actualizacion, escalafon,
+        perfil, cat_minciencia, conv_minciencia, nacionalidaad,
+        linea_investigacion_principal, activo
+    ) VALUES (
+        p_cedula, p_nombres, p_apellidos, p_genero, p_cargo, p_fecha_nacimiento,
+        p_correo, p_telefono, p_url_cvlac, p_fecha_actualizacion, p_escalafon,
+        p_perfil, p_cat_minciencia, p_conv_minciencia, p_nacionalidaad,
+        p_linea_investigacion_principal, 1
+    );
+    SELECT * FROM docente WHERE cedula = p_cedula;
+END$$
+
+-- 4. Actualizar docente
+CREATE OR REPLACE PROCEDURE sp_actualizar_docente(
+    IN p_cedula INT,
+    IN p_nombres VARCHAR(60),
+    IN p_apellidos VARCHAR(60),
+    IN p_genero VARCHAR(12),
+    IN p_cargo VARCHAR(30),
+    IN p_fecha_nacimiento DATE,
+    IN p_correo VARCHAR(70),
+    IN p_telefono VARCHAR(20),
+    IN p_url_cvlac VARCHAR(128),
+    IN p_fecha_actualizacion DATE,
+    IN p_escalafon VARCHAR(45),
+    IN p_perfil LONGTEXT,
+    IN p_cat_minciencia VARCHAR(45),
+    IN p_conv_minciencia VARCHAR(45),
+    IN p_nacionalidaad VARCHAR(45),
+    IN p_linea_investigacion_principal INT
+)
+BEGIN
+    UPDATE docente SET
+        nombres = p_nombres,
+        apellidos = p_apellidos,
+        genero = p_genero,
+        cargo = p_cargo,
+        fecha_nacimiento = p_fecha_nacimiento,
+        correo = p_correo,
+        telefono = p_telefono,
+        url_cvlac = p_url_cvlac,
+        fecha_actualizacion = p_fecha_actualizacion,
+        escalafon = p_escalafon,
+        perfil = p_perfil,
+        cat_minciencia = p_cat_minciencia,
+        conv_minciencia = p_conv_minciencia,
+        nacionalidaad = p_nacionalidaad,
+        linea_investigacion_principal = p_linea_investigacion_principal
+    WHERE cedula = p_cedula AND activo = 1;
+    SELECT * FROM docente WHERE cedula = p_cedula;
+END$$
+
+-- 5. Eliminar (retirar) docente: REGLA DE NEGOCIO ESTRICTA
+-- No se puede retirar el docente si tiene estudios registrados activos
+CREATE OR REPLACE PROCEDURE sp_eliminar_docente(
+    IN p_cedula INT
+)
+BEGIN
+    DECLARE v_estudios_activos INT DEFAULT 0;
+
+    SELECT COUNT(*) INTO v_estudios_activos
+    FROM estudios_realizados
+    WHERE docente = p_cedula AND activo = 1;
+
+    IF v_estudios_activos > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No se puede retirar el docente porque tiene estudios registrados.';
+    END IF;
+
+    UPDATE docente SET activo = 0 WHERE cedula = p_cedula;
+END$$
+
+-- 6. Listar estudios realizados activos
+CREATE OR REPLACE PROCEDURE sp_listar_estudios_realizados()
+BEGIN
+    SELECT * FROM estudios_realizados WHERE activo = 1 ORDER BY fecha DESC, id DESC;
+END$$
+
+-- 7. Consultar estudio realizado por ID
+CREATE OR REPLACE PROCEDURE sp_consultar_estudio_realizado(
+    IN p_id INT
+)
+BEGIN
+    SELECT * FROM estudios_realizados WHERE id = p_id AND activo = 1;
+END$$
+
+-- 8. Listar estudios realizados por docente
+CREATE OR REPLACE PROCEDURE sp_listar_estudios_por_docente(
+    IN p_docente INT
+)
+BEGIN
+    SELECT * FROM estudios_realizados WHERE docente = p_docente AND activo = 1 ORDER BY fecha DESC, id DESC;
+END$$
+
+-- 9. Crear estudio realizado
+CREATE OR REPLACE PROCEDURE sp_crear_estudio_realizado(
+    IN p_titulo VARCHAR(45),
+    IN p_universidad VARCHAR(50),
+    IN p_fecha DATE,
+    IN p_tipo VARCHAR(45),
+    IN p_ciudad VARCHAR(45),
+    IN p_docente INT,
+    IN p_ins_acreditada TINYINT,
+    IN p_metodologia VARCHAR(45),
+    IN p_perfil_egresado LONGTEXT,
+    IN p_pais VARCHAR(45)
+)
+BEGIN
+    DECLARE v_id INT;
+
+    INSERT INTO estudios_realizados (
+        titulo, universidad, fecha, tipo, ciudad, docente,
+        ins_acreditada, metodologia, perfil_egresado, pais, activo
+    ) VALUES (
+        p_titulo, p_universidad, p_fecha, p_tipo, p_ciudad, p_docente,
+        p_ins_acreditada, p_metodologia, p_perfil_egresado, p_pais, 1
+    );
+
+    SET v_id = LAST_INSERT_ID();
+    SELECT * FROM estudios_realizados WHERE id = v_id;
+END$$
+
+-- 10. Actualizar estudio realizado
+CREATE OR REPLACE PROCEDURE sp_actualizar_estudio_realizado(
+    IN p_id INT,
+    IN p_titulo VARCHAR(45),
+    IN p_universidad VARCHAR(50),
+    IN p_fecha DATE,
+    IN p_tipo VARCHAR(45),
+    IN p_ciudad VARCHAR(45),
+    IN p_docente INT,
+    IN p_ins_acreditada TINYINT,
+    IN p_metodologia VARCHAR(45),
+    IN p_perfil_egresado LONGTEXT,
+    IN p_pais VARCHAR(45)
+)
+BEGIN
+    UPDATE estudios_realizados SET
+        titulo = p_titulo,
+        universidad = p_universidad,
+        fecha = p_fecha,
+        tipo = p_tipo,
+        ciudad = p_ciudad,
+        docente = p_docente,
+        ins_acreditada = p_ins_acreditada,
+        metodologia = p_metodologia,
+        perfil_egresado = p_perfil_egresado,
+        pais = p_pais
+    WHERE id = p_id AND activo = 1;
+    SELECT * FROM estudios_realizados WHERE id = p_id;
+END$$
+
+-- 11. Eliminar (retirar) estudio realizado
+CREATE OR REPLACE PROCEDURE sp_eliminar_estudio_realizado(
+    IN p_id INT
+)
+BEGIN
+    UPDATE estudios_realizados SET activo = 0 WHERE id = p_id;
+END$$
+
+DELIMITER ;
