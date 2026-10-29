@@ -1088,3 +1088,68 @@ function retirar_reconocimiento(int $id): array
 
     return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
 }
+
+
+// -----------------------------------------------------------------------------
+// ALIAS DE COMPATIBILIDAD V1 / V2 (LÍNEAS DE INVESTIGACIÓN Y TÉRMINOS CLAVE)
+// -----------------------------------------------------------------------------
+
+function listar_lineas_investigacion(int $limite = 1000): array
+{
+    return listar_lineas($limite);
+}
+
+function obtener_linea_investigacion(int $id): array
+{
+    return obtener_linea($id);
+}
+
+function crear_linea_investigacion(array $datos): array
+{
+    return crear_linea($datos);
+}
+
+function reemplazar_linea_investigacion(int $id, array $datos): array
+{
+    return reemplazar_linea($id, $datos);
+}
+
+function actualizar_parcial_linea_investigacion(int $id, array $datos): array
+{
+    return actualizar_parcial_linea($id, $datos);
+}
+
+function retirar_linea_investigacion(int $id): array
+{
+    return retirar_linea($id);
+}
+
+function listar_terminos_clave(int $limite = 1000): array
+{
+    return listar_terminos($limite);
+}
+
+function obtener_termino_clave(string $termino): array
+{
+    return obtener_termino($termino);
+}
+
+function crear_termino_clave(array $datos): array
+{
+    return crear_termino($datos);
+}
+
+function reemplazar_termino_clave(string $termino, array $datos): array
+{
+    return reemplazar_termino($termino, $datos);
+}
+
+function actualizar_parcial_termino_clave(string $termino, array $datos): array
+{
+    return actualizar_parcial_termino($termino, $datos);
+}
+
+function retirar_termino_clave(string $termino): array
+{
+    return retirar_termino($termino);
+}
