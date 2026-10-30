@@ -7,45 +7,39 @@
     <!-- Carga del archivo CSS local según especificación (Artículo 2) -->
     <link rel="stylesheet" href="/publico/css/bootstrap.min.css">
     <style>
-        /* Mejor soporte visual para dropdowns sin bootstrap.js */
         .dropdown-menu.show {
             display: block;
+        }
+        .navbar-nav .nav-link {
+            padding-right: 0.9rem;
+            padding-left: 0.9rem;
         }
     </style>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
     <div class="container">
-        <a class="navbar-brand font-weight-bold" href="/">Gestión Profesoral</a>
+        <a class="navbar-brand font-weight-bold" href="/">
+            Gestión Profesoral
+        </a>
         <button class="navbar-toggler" type="button" id="navbarToggler" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarMenu">
             <ul class="navbar-nav mr-auto">
-                <!-- V2: Módulo Maestro-Detalle y Dependientes -->
                 <li class="nav-item">
-                    <a class="nav-link font-weight-bold text-warning" href="/docentes">Docentes (M-D)</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/estudios">Estudios</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/evaluaciones">Evaluaciones</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/experiencias">Experiencia</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/reconocimientos">Reconocimientos</a>
+                    <a class="nav-link" href="/">Inicio</a>
                 </li>
 
-                <!-- Separador / V1 -->
+                <!-- Versión 1: Catálogos -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="v1Dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        Catálogos V1
+                    <a class="nav-link dropdown-toggle text-info font-weight-bold" href="#" id="v1Dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        Versión 1: Catálogos
                     </a>
                     <div class="dropdown-menu" id="v1DropdownMenu" aria-labelledby="v1Dropdown">
+                        <h6 class="dropdown-header text-uppercase font-weight-bold text-muted">Parámetros Base</h6>
                         <a class="dropdown-item" href="/programas">Programas Académicos</a>
                         <a class="dropdown-item" href="/redes">Redes Académicas</a>
                         <a class="dropdown-item" href="/lineas">Líneas de Investigación</a>
@@ -53,10 +47,29 @@
                         <a class="dropdown-item" href="/areas">Áreas de Conocimiento</a>
                     </div>
                 </li>
+
+                <!-- Versión 2: Gestión Docente -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-warning font-weight-bold" href="#" id="v2Dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        Versión 2: Gestión Docente
+                    </a>
+                    <div class="dropdown-menu" id="v2DropdownMenu" aria-labelledby="v2Dropdown">
+                        <h6 class="dropdown-header text-uppercase font-weight-bold text-muted">Maestro - Detalle</h6>
+                        <a class="dropdown-item" href="/docentes"><strong>Docentes (Maestro-Detalle)</strong></a>
+                        <a class="dropdown-item" href="/estudios">Estudios Realizados</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header text-uppercase font-weight-bold text-muted">Módulos con Clave Foránea</h6>
+                        <a class="dropdown-item" href="/evaluaciones">Evaluación Docente</a>
+                        <a class="dropdown-item" href="/experiencias">Experiencia</a>
+                        <a class="dropdown-item" href="/reconocimientos">Reconocimiento</a>
+                    </div>
+                </li>
             </ul>
-            <span class="navbar-text text-light">
-                <span class="badge badge-success">V2</span>
-            </span>
+
+            <div class="navbar-text text-light small d-none d-md-block">
+                <span class="badge badge-info mr-1">V1 Activa</span>
+                <span class="badge badge-warning">V2 Activa</span>
+            </div>
         </div>
     </div>
 </nav>
@@ -67,12 +80,12 @@
 
 <footer class="footer py-3 bg-white border-top text-center text-muted mt-auto">
     <div class="container">
-        <small>Sistema de Gestión Profesoral &copy; <?php echo date('Y'); ?> — Módulo Docente (V2)</small>
+        <small>Sistema de Gestión Profesoral y Académica &copy; <?php echo date('Y'); ?> — Proyecto Integrado (V1 y V2)</small>
     </div>
 </footer>
 
 <script>
-// Manejo nativo de desplegables sin dependencias externas (Bootstrap JS / jQuery)
+// Manejo nativo de desplegables sin dependencias externas
 document.addEventListener('DOMContentLoaded', function() {
     var dropdowns = document.querySelectorAll('.dropdown-toggle');
     dropdowns.forEach(function(btn) {
