@@ -1153,3 +1153,511 @@ function retirar_termino_clave(string $termino): array
 {
     return retirar_termino($termino);
 }
+
+
+// =============================================================================
+// V2: TABLAS DEPENDIENTES Y ASOCIACIONES (PARTE COMPANERO)
+// =============================================================================
+
+
+// --- 1. DOCENTE - DEPARTAMENTO ---
+function listar_docente_departamentos(int $limite = 1000): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/docente-departamento?limite=' . $limite);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo conectar con el servidor de la API.'];
+    }
+    if ($codigoHttp === 204) {
+        return ['tabla' => 'docente_departamento', 'total' => 0, 'datos' => []];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function obtener_docente_departamento(int $docente, int $departamento): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/docente-departamento/{$docente}/{$departamento}");
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'Sin conexión con la API.'];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function crear_docente_departamento(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/docente-departamento');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function reemplazar_docente_departamento(int $docente, int $departamento, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/docente-departamento/{$docente}/{$departamento}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PUT',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function actualizar_parcial_docente_departamento(int $docente, int $departamento, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/docente-departamento/{$docente}/{$departamento}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PATCH',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_docente_departamento(int $docente, int $departamento): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/docente-departamento/{$docente}/{$departamento}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+// --- 2. INTERESES FUTUROS (TABLA PUENTE) ---
+function listar_intereses_futuros(int $limite = 1000): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/intereses-futuros?limite=' . $limite);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo conectar con el servidor de la API.'];
+    }
+    if ($codigoHttp === 204) {
+        return ['tabla' => 'intereses_futuros', 'total' => 0, 'datos' => []];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function crear_interes_futuro(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/intereses-futuros');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_interes_futuro(int $docente, string $termino): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/intereses-futuros/{$docente}/" . rawurlencode($termino));
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+// --- 3. RED DOCENTE ---
+function listar_redes_docentes(int $limite = 1000): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/red-docente?limite=' . $limite);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo conectar con el servidor de la API.'];
+    }
+    if ($codigoHttp === 204) {
+        return ['tabla' => 'red_docente', 'total' => 0, 'datos' => []];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function obtener_red_docente(int $red, int $docente): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/red-docente/{$red}/{$docente}");
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'Sin conexión con la API.'];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function crear_red_docente(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/red-docente');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function reemplazar_red_docente(int $red, int $docente, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/red-docente/{$red}/{$docente}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PUT',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function actualizar_parcial_red_docente(int $red, int $docente, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/red-docente/{$red}/{$docente}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PATCH',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_red_docente(int $red, int $docente): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/red-docente/{$red}/{$docente}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+// --- 4. ESTUDIO - ÁREA DE CONOCIMIENTO (TABLA PUENTE) ---
+function listar_estudios_ac(int $limite = 1000): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/estudio-ac?limite=' . $limite);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo conectar con el servidor de la API.'];
+    }
+    if ($codigoHttp === 204) {
+        return ['tabla' => 'estudio_ac', 'total' => 0, 'datos' => []];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function crear_estudio_ac(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/estudio-ac');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_estudio_ac(int $estudio, string $area): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/estudio-ac/{$estudio}/" . rawurlencode($area));
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+// --- 5. APOYO PROFESORAL ---
+function listar_apoyos_profesorales(int $limite = 1000): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/apoyo-profesoral?limite=' . $limite);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo conectar con el servidor de la API.'];
+    }
+    if ($codigoHttp === 204) {
+        return ['tabla' => 'apoyo_profesoral', 'total' => 0, 'datos' => []];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function obtener_apoyo_profesoral(int $estudios): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/apoyo-profesoral/{$estudios}");
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'Sin conexión con la API.'];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function crear_apoyo_profesoral(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/apoyo-profesoral');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function reemplazar_apoyo_profesoral(int $estudios, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/apoyo-profesoral/{$estudios}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PUT',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function actualizar_parcial_apoyo_profesoral(int $estudios, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/apoyo-profesoral/{$estudios}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PATCH',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_apoyo_profesoral(int $estudios): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/apoyo-profesoral/{$estudios}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+// --- 6. BECA ---
+function listar_becas(int $limite = 1000): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/beca?limite=' . $limite);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo conectar con el servidor de la API.'];
+    }
+    if ($codigoHttp === 204) {
+        return ['tabla' => 'beca', 'total' => 0, 'datos' => []];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function obtener_beca(int $estudios): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/beca/{$estudios}");
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'Sin conexión con la API.'];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function crear_beca(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/beca');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function reemplazar_beca(int $estudios, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/beca/{$estudios}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PUT',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function actualizar_parcial_beca(int $estudios, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/beca/{$estudios}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PATCH',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_beca(int $estudios): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/beca/{$estudios}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}

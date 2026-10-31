@@ -755,6 +755,386 @@ if ($uri === '/' || $uri === '') {
     }
     exit;
 
+
+// =============================================================================
+// V2: TABLAS DEPENDIENTES Y ASOCIACIONES (PARTE COMPANERO)
+// =============================================================================
+} elseif ($uri === '/docente-departamentos') {
+    $respuesta = listar_docente_departamentos();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $vinculaciones = [];
+    } else {
+        $vinculaciones = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_docente_departamento.php';
+} elseif ($uri === '/docente-departamentos/nuevo') {
+    $registro  = [];
+    $errores   = [];
+    $esEdicion = false;
+    $docentes  = listar_docentes()['datos'] ?? [];
+    $programas = listar_programas()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_docente_departamento.php';
+} elseif ($uri === '/docente-departamentos/crear' && $metodo === 'POST') {
+    $res = crear_docente_departamento($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /docente-departamentos?exito=' . urlencode('Vinculación creada correctamente.'));
+        exit;
+    } else {
+        $registro  = $_POST;
+        $errores   = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al crear la vinculación.'];
+        $esEdicion = false;
+        $docentes  = listar_docentes()['datos'] ?? [];
+        $programas = listar_programas()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_docente_departamento.php';
+    }
+} elseif ($uri === '/docente-departamentos/editar') {
+    $docente      = (int)($_GET['docente'] ?? 0);
+    $departamento = (int)($_GET['departamento'] ?? 0);
+    $registro     = obtener_docente_departamento($docente, $departamento);
+    if (isset($registro['error']) || (isset($registro['estado']) && $registro['estado'] === 404)) {
+        header('Location: /docente-departamentos?error=' . urlencode('La vinculación seleccionada no existe.'));
+        exit;
+    }
+    $errores   = [];
+    $esEdicion = true;
+    $docentes  = listar_docentes()['datos'] ?? [];
+    $programas = listar_programas()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_docente_departamento.php';
+} elseif ($uri === '/docente-departamentos/guardar-edicion' && $metodo === 'POST') {
+    $docente      = (int)($_POST['docente'] ?? 0);
+    $departamento = (int)($_POST['departamento'] ?? 0);
+    $accion       = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_docente_departamento($docente, $departamento, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['docente'], $datos['departamento'], $datos['accion']);
+        $res = actualizar_parcial_docente_departamento($docente, $departamento, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /docente-departamentos?exito=' . urlencode('Vinculación modificada correctamente.'));
+        exit;
+    } else {
+        $errores   = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar la vinculación.'];
+        $registro  = $_POST;
+        $esEdicion = true;
+        $docentes  = listar_docentes()['datos'] ?? [];
+        $programas = listar_programas()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_docente_departamento.php';
+    }
+} elseif ($uri === '/docente-departamentos/retirar' && $metodo === 'POST') {
+    $docente      = (int)($_POST['docente'] ?? 0);
+    $departamento = (int)($_POST['departamento'] ?? 0);
+    $res          = retirar_docente_departamento($docente, $departamento);
+    if ($res['codigo'] === 200) {
+        header('Location: /docente-departamentos?exito=' . urlencode('Vinculación retirada con éxito.'));
+    } else {
+        header('Location: /docente-departamentos?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la vinculación.'));
+    }
+    exit;
+
+// --- 2. INTERESES FUTUROS (TABLA PUENTE) ---
+} elseif ($uri === '/intereses-futuros') {
+    $respuesta = listar_intereses_futuros();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $intereses = [];
+    } else {
+        $intereses = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_intereses_futuros.php';
+} elseif ($uri === '/intereses-futuros/nuevo') {
+    $registro = [];
+    $errores  = [];
+    $docentes = listar_docentes()['datos'] ?? [];
+    $terminos = listar_terminos()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_intereses_futuros.php';
+} elseif ($uri === '/intereses-futuros/crear' && $metodo === 'POST') {
+    $res = crear_interes_futuro($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /intereses-futuros?exito=' . urlencode('Interés de investigación asignado correctamente.'));
+        exit;
+    } else {
+        $registro = $_POST;
+        $errores  = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al asignar el interés de investigación.'];
+        $docentes = listar_docentes()['datos'] ?? [];
+        $terminos = listar_terminos()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_intereses_futuros.php';
+    }
+} elseif ($uri === '/intereses-futuros/retirar' && $metodo === 'POST') {
+    $docente = (int)($_POST['docente'] ?? 0);
+    $termino = (string)($_POST['termino_clave'] ?? '');
+    $res     = retirar_interes_futuro($docente, $termino);
+    if ($res['codigo'] === 200) {
+        header('Location: /intereses-futuros?exito=' . urlencode('Interés retirado con éxito.'));
+    } else {
+        header('Location: /intereses-futuros?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar el interés.'));
+    }
+    exit;
+
+// --- 3. RED DOCENTE ---
+} elseif ($uri === '/redes-docentes') {
+    $respuesta = listar_redes_docentes();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $vinculaciones = [];
+    } else {
+        $vinculaciones = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_red_docente.php';
+} elseif ($uri === '/redes-docentes/nueva') {
+    $registro  = [];
+    $errores   = [];
+    $esEdicion = false;
+    $redes     = listar_redes()['datos'] ?? [];
+    $docentes  = listar_docentes()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_red_docente.php';
+} elseif ($uri === '/redes-docentes/crear' && $metodo === 'POST') {
+    $res = crear_red_docente($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /redes-docentes?exito=' . urlencode('Participación en red registrada correctamente.'));
+        exit;
+    } else {
+        $registro  = $_POST;
+        $errores   = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al registrar participación en la red.'];
+        $esEdicion = false;
+        $redes     = listar_redes()['datos'] ?? [];
+        $docentes  = listar_docentes()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_red_docente.php';
+    }
+} elseif ($uri === '/redes-docentes/editar') {
+    $red       = (int)($_GET['red'] ?? 0);
+    $docente   = (int)($_GET['docente'] ?? 0);
+    $registro  = obtener_red_docente($red, $docente);
+    if (isset($registro['error']) || (isset($registro['estado']) && $registro['estado'] === 404)) {
+        header('Location: /redes-docentes?error=' . urlencode('La vinculación a la red no existe.'));
+        exit;
+    }
+    $errores   = [];
+    $esEdicion = true;
+    $redes     = listar_redes()['datos'] ?? [];
+    $docentes  = listar_docentes()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_red_docente.php';
+} elseif ($uri === '/redes-docentes/guardar-edicion' && $metodo === 'POST') {
+    $red     = (int)($_POST['red'] ?? 0);
+    $docente = (int)($_POST['docente'] ?? 0);
+    $accion  = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_red_docente($red, $docente, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['red'], $datos['docente'], $datos['accion']);
+        $res = actualizar_parcial_red_docente($red, $docente, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /redes-docentes?exito=' . urlencode('Participación modificada correctamente.'));
+        exit;
+    } else {
+        $errores   = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar la participación.'];
+        $registro  = $_POST;
+        $esEdicion = true;
+        $redes     = listar_redes()['datos'] ?? [];
+        $docentes  = listar_docentes()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_red_docente.php';
+    }
+} elseif ($uri === '/redes-docentes/retirar' && $metodo === 'POST') {
+    $red     = (int)($_POST['red'] ?? 0);
+    $docente = (int)($_POST['docente'] ?? 0);
+    $res     = retirar_red_docente($red, $docente);
+    if ($res['codigo'] === 200) {
+        header('Location: /redes-docentes?exito=' . urlencode('Participación retirada con éxito.'));
+    } else {
+        header('Location: /redes-docentes?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la participación.'));
+    }
+    exit;
+
+// --- 4. ESTUDIO - ÁREA DE CONOCIMIENTO (TABLA PUENTE) ---
+} elseif ($uri === '/estudios-areas') {
+    $respuesta = listar_estudios_ac();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $asociaciones = [];
+    } else {
+        $asociaciones = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_estudio_ac.php';
+} elseif ($uri === '/estudios-areas/nuevo') {
+    $registro = [];
+    $errores  = [];
+    $estudios = listar_estudios_realizados()['datos'] ?? [];
+    $areas    = listar_areas()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_estudio_ac.php';
+} elseif ($uri === '/estudios-areas/crear' && $metodo === 'POST') {
+    $res = crear_estudio_ac($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /estudios-areas?exito=' . urlencode('Área de conocimiento asignada correctamente al estudio.'));
+        exit;
+    } else {
+        $registro = $_POST;
+        $errores  = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al asociar el área al estudio.'];
+        $estudios = listar_estudios_realizados()['datos'] ?? [];
+        $areas    = listar_areas()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_estudio_ac.php';
+    }
+} elseif ($uri === '/estudios-areas/retirar' && $metodo === 'POST') {
+    $estudio = (int)($_POST['estudio'] ?? 0);
+    $area    = (string)($_POST['area_conocimiento'] ?? '');
+    $res     = retirar_estudio_ac($estudio, $area);
+    if ($res['codigo'] === 200) {
+        header('Location: /estudios-areas?exito=' . urlencode('Asociación retirada con éxito.'));
+    } else {
+        header('Location: /estudios-areas?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la asociación.'));
+    }
+    exit;
+
+// --- 5. APOYO PROFESORAL ---
+} elseif ($uri === '/apoyos-profesorales') {
+    $respuesta = listar_apoyos_profesorales();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $apoyos = [];
+    } else {
+        $apoyos = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_apoyo_profesoral.php';
+} elseif ($uri === '/apoyos-profesorales/nuevo') {
+    $registro  = [];
+    $errores   = [];
+    $esEdicion = false;
+    $estudios  = listar_estudios_realizados()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_apoyo_profesoral.php';
+} elseif ($uri === '/apoyos-profesorales/crear' && $metodo === 'POST') {
+    $res = crear_apoyo_profesoral($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /apoyos-profesorales?exito=' . urlencode('Apoyo profesoral registrado correctamente.'));
+        exit;
+    } else {
+        $registro  = $_POST;
+        $errores   = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al registrar el apoyo profesoral.'];
+        $esEdicion = false;
+        $estudios  = listar_estudios_realizados()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_apoyo_profesoral.php';
+    }
+} elseif ($uri === '/apoyos-profesorales/editar') {
+    $estudios  = (int)($_GET['estudios'] ?? 0);
+    $registro  = obtener_apoyo_profesoral($estudios);
+    if (isset($registro['error']) || (isset($registro['estado']) && $registro['estado'] === 404)) {
+        header('Location: /apoyos-profesorales?error=' . urlencode('El apoyo profesoral seleccionado no existe.'));
+        exit;
+    }
+    $errores   = [];
+    $esEdicion = true;
+    $estudios  = listar_estudios_realizados()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_apoyo_profesoral.php';
+} elseif ($uri === '/apoyos-profesorales/guardar-edicion' && $metodo === 'POST') {
+    $estudios = (int)($_POST['estudios'] ?? 0);
+    $accion   = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_apoyo_profesoral($estudios, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['estudios'], $datos['accion']);
+        $res = actualizar_parcial_apoyo_profesoral($estudios, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /apoyos-profesorales?exito=' . urlencode('Apoyo profesoral modificado correctamente.'));
+        exit;
+    } else {
+        $errores   = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar el apoyo profesoral.'];
+        $registro  = $_POST;
+        $esEdicion = true;
+        $estudios  = listar_estudios_realizados()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_apoyo_profesoral.php';
+    }
+} elseif ($uri === '/apoyos-profesorales/retirar' && $metodo === 'POST') {
+    $estudios = (int)($_POST['estudios'] ?? 0);
+    $res      = retirar_apoyo_profesoral($estudios);
+    if ($res['codigo'] === 200) {
+        header('Location: /apoyos-profesorales?exito=' . urlencode('Apoyo profesoral retirado con éxito.'));
+    } else {
+        header('Location: /apoyos-profesorales?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar el apoyo profesoral.'));
+    }
+    exit;
+
+// --- 6. BECA ---
+} elseif ($uri === '/becas') {
+    $respuesta = listar_becas();
+    if (isset($respuesta['error'])) {
+        $mensajeError = $respuesta['error'];
+        $becas = [];
+    } else {
+        $becas = $respuesta['datos'] ?? [];
+    }
+    require __DIR__ . '/vistas/lista_beca.php';
+} elseif ($uri === '/becas/nueva') {
+    $registro  = [];
+    $errores   = [];
+    $esEdicion = false;
+    $estudios  = listar_estudios_realizados()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_beca.php';
+} elseif ($uri === '/becas/crear' && $metodo === 'POST') {
+    $res = crear_beca($_POST);
+    if ($res['codigo'] === 200) {
+        header('Location: /becas?exito=' . urlencode('Beca registrada correctamente.'));
+        exit;
+    } else {
+        $registro  = $_POST;
+        $errores   = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al registrar la beca.'];
+        $esEdicion = false;
+        $estudios  = listar_estudios_realizados()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_beca.php';
+    }
+} elseif ($uri === '/becas/editar') {
+    $estudios  = (int)($_GET['estudios'] ?? 0);
+    $registro  = obtener_beca($estudios);
+    if (isset($registro['error']) || (isset($registro['estado']) && $registro['estado'] === 404)) {
+        header('Location: /becas?error=' . urlencode('La beca seleccionada no existe.'));
+        exit;
+    }
+    $errores   = [];
+    $esEdicion = true;
+    $estudios  = listar_estudios_realizados()['datos'] ?? [];
+    require __DIR__ . '/vistas/formulario_beca.php';
+} elseif ($uri === '/becas/guardar-edicion' && $metodo === 'POST') {
+    $estudios = (int)($_POST['estudios'] ?? 0);
+    $accion   = $_POST['accion'] ?? 'reemplazar';
+
+    if ($accion === 'reemplazar') {
+        $res = reemplazar_beca($estudios, $_POST);
+    } else {
+        $datos = array_filter($_POST, fn($v) => $v !== '' && $v !== null);
+        unset($datos['estudios'], $datos['accion']);
+        $res = actualizar_parcial_beca($estudios, $datos);
+    }
+
+    if ($res['codigo'] === 200) {
+        header('Location: /becas?exito=' . urlencode('Beca modificada correctamente.'));
+        exit;
+    } else {
+        $errores   = $res['cuerpo']['errores'] ?? [$res['cuerpo']['mensaje'] ?? 'Error al modificar la beca.'];
+        $registro  = $_POST;
+        $esEdicion = true;
+        $estudios  = listar_estudios_realizados()['datos'] ?? [];
+        require __DIR__ . '/vistas/formulario_beca.php';
+    }
+} elseif ($uri === '/becas/retirar' && $metodo === 'POST') {
+    $estudios = (int)($_POST['estudios'] ?? 0);
+    $res      = retirar_beca($estudios);
+    if ($res['codigo'] === 200) {
+        header('Location: /becas?exito=' . urlencode('Beca retirada con éxito.'));
+    } else {
+        header('Location: /becas?error=' . urlencode($res['cuerpo']['mensaje'] ?? 'No se pudo retirar la beca.'));
+    }
+    exit;
+
+    
 } else {
     http_response_code(404);
     require __DIR__ . '/vistas/no_encontrada.php';

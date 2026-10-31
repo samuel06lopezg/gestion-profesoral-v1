@@ -14,6 +14,10 @@
             padding-right: 0.9rem;
             padding-left: 0.9rem;
         }
+        .dropdown-menu {
+            max-height: 85vh;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
@@ -48,27 +52,37 @@
                     </div>
                 </li>
 
-                <!-- Versión 2: Gestión Docente -->
+                <!-- Versión 2: Gestión Docente (11 Tablas Completas) -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-warning font-weight-bold" href="#" id="v2Dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         Versión 2: Gestión Docente
                     </a>
                     <div class="dropdown-menu" id="v2DropdownMenu" aria-labelledby="v2Dropdown">
-                        <h6 class="dropdown-header text-uppercase font-weight-bold text-muted">Maestro - Detalle</h6>
+                        <h6 class="dropdown-header text-uppercase font-weight-bold text-primary">Maestro - Detalle Principal</h6>
                         <a class="dropdown-item" href="/docentes"><strong>Docentes (Maestro-Detalle)</strong></a>
                         <a class="dropdown-item" href="/estudios">Estudios Realizados</a>
+                        
                         <div class="dropdown-divider"></div>
-                        <h6 class="dropdown-header text-uppercase font-weight-bold text-muted">Módulos con Clave Foránea</h6>
+                        <h6 class="dropdown-header text-uppercase font-weight-bold text-muted">Seguimiento y Calidad</h6>
                         <a class="dropdown-item" href="/evaluaciones">Evaluación Docente</a>
-                        <a class="dropdown-item" href="/experiencias">Experiencia</a>
+                        <a class="dropdown-item" href="/experiencias">Experiencia Laboral</a>
                         <a class="dropdown-item" href="/reconocimientos">Reconocimiento</a>
+
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header text-uppercase font-weight-bold text-muted">Vinculaciones y Beneficios</h6>
+                        <a class="dropdown-item" href="/docente-departamentos">Docente - Programa</a>
+                        <a class="dropdown-item" href="/intereses-futuros">Intereses de Investigación</a>
+                        <a class="dropdown-item" href="/redes-docentes">Redes Académicas Docente</a>
+                        <a class="dropdown-item" href="/estudios-areas">Estudios - Áreas</a>
+                        <a class="dropdown-item" href="/apoyos-profesorales">Apoyos Profesorales</a>
+                        <a class="dropdown-item" href="/becas">Becas de Estudio</a>
                     </div>
                 </li>
             </ul>
 
             <div class="navbar-text text-light small d-none d-md-block">
                 <span class="badge badge-info mr-1">V1 Activa</span>
-                <span class="badge badge-warning">V2 Activa</span>
+                <span class="badge badge-warning">V2 Completa (11 Tablas)</span>
             </div>
         </div>
     </div>
@@ -80,7 +94,7 @@
 
 <footer class="footer py-3 bg-white border-top text-center text-muted mt-auto">
     <div class="container">
-        <small>Sistema de Gestión Profesoral y Académica &copy; <?php echo date('Y'); ?> — Proyecto Integrado (V1 y V2)</small>
+        <small>Sistema de Gestión Profesoral y Académica &copy; <?php echo date('Y'); ?> — Proyecto Integrado (V1 y V2 Completa)</small>
     </div>
 </footer>
 

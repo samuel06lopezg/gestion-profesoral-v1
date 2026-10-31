@@ -1,7 +1,7 @@
 <div class="jumbotron bg-white border shadow-sm p-4 p-md-5 mb-4 text-center">
     <h1 class="display-5 font-weight-bold mb-2">Sistema de Gestión Profesoral y Académica</h1>
-    <p class="lead text-muted mx-auto" style="max-width: 800px;">
-        Portal institucional integrado. Selecciona la versión del sistema a la que deseas acceder para administrar los datos académicos o la planta docente.
+    <p class="lead text-muted mx-auto" style="max-width: 850px;">
+        Portal institucional integrado. Administra los parámetros curriculares base (Versión 1) o la planta docente completa con sus 11 tablas relacionales y maestro-detalle (Versión 2).
     </p>
 </div>
 
@@ -15,7 +15,7 @@
             </div>
             <div class="card-body d-flex flex-column">
                 <p class="text-muted">
-                    Administración de catálogos institucionales, parámetros curriculares, áreas MinCiencias y redes de investigación.
+                    Administración de catálogos institucionales, parámetros curriculares, áreas MinCiencias y redes de investigación sin claves foráneas.
                 </p>
 
                 <div class="mb-3">
@@ -50,16 +50,16 @@
         </div>
     </div>
 
-    <!-- Opción 2: Versión 2 -->
+    <!-- Opción 2: Versión 2 Completa -->
     <div class="col-lg-6 mb-4">
         <div class="card h-100 shadow-sm border-warning">
             <div class="card-header bg-dark text-warning d-flex justify-content-between align-items-center py-3">
-                <h4 class="h5 mb-0 font-weight-bold">Versión 2: Gestión Docente</h4>
-                <span class="badge badge-warning text-dark font-weight-bold">V2 Maestro-Detalle</span>
+                <h4 class="h5 mb-0 font-weight-bold">Versión 2: Gestión Docente Completa</h4>
+                <span class="badge badge-warning text-dark font-weight-bold">11 Tablas Integradas</span>
             </div>
             <div class="card-body d-flex flex-column">
                 <p class="text-muted">
-                    Gestión integral de profesores, relación maestro-detalle atómica (Docente con Estudios), evaluaciones, experiencia y reconocimientos.
+                    Gestión integral de profesores con maestro-detalle atómico por Procedimientos Almacenados, seguimiento, vinculaciones, apoyos y becas.
                 </p>
 
                 <div class="mb-3">
@@ -68,26 +68,55 @@
                     </a>
                 </div>
 
-                <div class="list-group list-group-flush mt-auto border-top pt-2">
-                    <a href="/docentes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Docentes (Maestro-Detalle)</strong> <small class="text-muted d-block">Planta docente y estudios en transacción única</small></span>
+                <div class="list-group list-group-flush mt-auto border-top pt-2" style="max-height: 480px; overflow-y: auto;">
+                    <!-- Maestro-Detalle -->
+                    <a href="/docentes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 bg-light">
+                        <span><strong>Docentes (Maestro-Detalle)</strong> <small class="text-muted d-block">Planta docente y estudios en transacción atómica (sp_*)</small></span>
                         <span class="badge badge-warning text-dark">Maestro</span>
                     </a>
                     <a href="/estudios" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Estudios Realizados</strong> <small class="text-muted d-block">Títulos, universidades y acreditación</small></span>
+                        <span><strong>Estudios Realizados</strong> <small class="text-muted d-block">Títulos académicos con regla de bloqueo de retiro</small></span>
                         <span class="badge badge-primary">Detalle</span>
                     </a>
+
+                    <!-- Seguimiento y Calidad -->
                     <a href="/evaluaciones" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Evaluación Docente</strong> <small class="text-muted d-block">Puntajes y periodos evaluativos con FK</small></span>
+                        <span><strong>Evaluación Docente</strong> <small class="text-muted d-block">Calificaciones y periodos semestrales con FK</small></span>
                         <span class="badge badge-info">CRUD</span>
                     </a>
                     <a href="/experiencias" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Experiencia Laboral</strong> <small class="text-muted d-block">Instituciones y trayectoria con FK</small></span>
+                        <span><strong>Experiencia Laboral</strong> <small class="text-muted d-block">Trayectoria en cargos e instituciones con FK</small></span>
                         <span class="badge badge-secondary">CRUD</span>
                     </a>
                     <a href="/reconocimientos" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Reconocimientos</strong> <small class="text-muted d-block">Premios, distinciones y condecoraciones con FK</small></span>
+                        <span><strong>Reconocimientos</strong> <small class="text-muted d-block">Premios y distinciones académicas con FK</small></span>
                         <span class="badge badge-dark">CRUD</span>
+                    </a>
+
+                    <!-- Vinculaciones y Beneficios -->
+                    <a href="/docente-departamentos" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
+                        <span><strong>Docente - Programa</strong> <small class="text-muted d-block">Vinculación a departamentos y programas</small></span>
+                        <span class="badge badge-success">Asociación</span>
+                    </a>
+                    <a href="/intereses-futuros" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
+                        <span><strong>Intereses de Investigación</strong> <small class="text-muted d-block">Puente entre docente y términos clave</small></span>
+                        <span class="badge badge-success">Asociación</span>
+                    </a>
+                    <a href="/redes-docentes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
+                        <span><strong>Redes Académicas Docente</strong> <small class="text-muted d-block">Participación institucional en redes científicas</small></span>
+                        <span class="badge badge-success">Asociación</span>
+                    </a>
+                    <a href="/estudios-areas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
+                        <span><strong>Estudios - Áreas</strong> <small class="text-muted d-block">Clasificación temática de estudios según MinCiencias</small></span>
+                        <span class="badge badge-success">Asociación</span>
+                    </a>
+                    <a href="/apoyos-profesorales" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
+                        <span><strong>Apoyos Profesorales</strong> <small class="text-muted d-block">Financiación institucional por estudio realizado</small></span>
+                        <span class="badge badge-info">Beneficio</span>
+                    </a>
+                    <a href="/becas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
+                        <span><strong>Becas de Estudio</strong> <small class="text-muted d-block">Registro de becas otorgadas para posgrados</small></span>
+                        <span class="badge badge-info">Beneficio</span>
                     </a>
                 </div>
             </div>
