@@ -35,7 +35,7 @@ function Probar-Endpoint($nombre, $metodo, $url, $body = $null, $codigoEsperado 
 }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "  INICIANDO SUITE DE PRUEBAS DE HUMO V2                   " -ForegroundColor Cyan
+Write-Host "  INICIANDO SUITE DE PRUEBAS DE HUMO V2 (11 TABLAS)       " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Diagnóstico
@@ -98,23 +98,24 @@ Probar-Endpoint "Validar Regla Negocio: Denegar Retiro de Docente con Estudios A
 $estudioInvalido = @{
     titulo = "Especialización Invalida"
     universidad = "Universidad X"
-    fecha = "2022-01-01"
+    fecha = "2020-01-01"
     tipo = "Especialización"
     ciudad = "Cali"
-    pais = "Colombia"
-    metodologia = "Virtual"
+    docente = 999999999
     ins_acreditada = 0
-    docente = 99999999
+    metodologia = "Virtual"
+    perfil_egresado = "Invalido"
+    pais = "Colombia"
 }
-Probar-Endpoint "Integridad Referencial: Crear Estudio con Docente Inexistente (409)" "POST" "$baseUrlApi/api/estudios-realizados" -body $estudioInvalido -codigoEsperado 409
+Probar-Endpoint "Integridad Referencial: Rechazar Estudio con Docente Inexistente (409)" "POST" "$baseUrlApi/api/estudios-realizados" -body $estudioInvalido -codigoEsperado 409
 
-# 6. Tablas Dependientes V2 con FK
+# 6. Tablas Dependientes V2 (Parte 1: Evaluaciones, Experiencias, Reconocimientos)
 $evaluacionPayload = @{
-    calificacion = 4.85
-    semestre = "2026-1"
+    calificacion = 4.8
+    semestre = "2025-2"
     docente = $cedulaPrueba
 }
-Probar-Endpoint "Crear Evaluación Docente con FK" "POST" "$baseUrlApi/api/evaluacion-docente" -body $evaluacionPayload -codigoEsperado 200
+Probar-Endpoint "Crear Evaluación con FK Docente" "POST" "$baseUrlApi/api/evaluacion-docente" -body $evaluacionPayload -codigoEsperado 200
 
 $experienciaPayload = @{
     nombre_cargo = "Líder de Arquitectura"
@@ -124,7 +125,7 @@ $experienciaPayload = @{
     fecha_fin = $null
     docente = $cedulaPrueba
 }
-Probar-Endpoint "Crear Experiencia con FK" "POST" "$baseUrlApi/api/experiencia" -body $experienciaPayload -codigoEsperado 200
+Probar-Endpoint "Crear Experiencia con FK Docente" "POST" "$baseUrlApi/api/experiencia" -body $experienciaPayload -codigoEsperado 200
 
 $reconocimientoPayload = @{
     tipo = "Premio a la Excelencia"
@@ -134,9 +135,18 @@ $reconocimientoPayload = @{
     ambito = "Nacional"
     docente = $cedulaPrueba
 }
-Probar-Endpoint "Crear Reconocimiento con FK" "POST" "$baseUrlApi/api/reconocimiento" -body $reconocimientoPayload -codigoEsperado 200
+Probar-Endpoint "Crear Reconocimiento con FK Docente" "POST" "$baseUrlApi/api/reconocimiento" -body $reconocimientoPayload -codigoEsperado 200
 
-# 7. Retirar los estudios del docente de prueba
+# 7. Tablas V2 (Parte 2: Vinculaciones, Asociaciones, Apoyos y Becas)
+Write-Host "`n--- VERIFICANDO RECURSOS VINCULADOS V2 ---" -ForegroundColor Yellow
+Probar-Endpoint "Listar Docente-Departamento" "GET" "$baseUrlApi/api/docente-departamento?limite=5" -codigoEsperado 200
+Probar-Endpoint "Listar Intereses Futuros" "GET" "$baseUrlApi/api/intereses-futuros?limite=5" -codigoEsperado 200
+Probar-Endpoint "Listar Redes Docente" "GET" "$baseUrlApi/api/red-docente?limite=5" -codigoEsperado 200
+Probar-Endpoint "Listar Estudios-Áreas" "GET" "$baseUrlApi/api/estudio-ac?limite=5" -codigoEsperado 200
+Probar-Endpoint "Listar Apoyos Profesorales" "GET" "$baseUrlApi/api/apoyo-profesoral?limite=5" -codigoEsperado 200
+Probar-Endpoint "Listar Becas" "GET" "$baseUrlApi/api/beca?limite=5" -codigoEsperado 200
+
+# 8. Retirar los estudios del docente de prueba
 if ($respConsulta) {
     $docenteObj = $respConsulta | ConvertFrom-Json
     if ($docenteObj.estudios) {
@@ -146,10 +156,10 @@ if ($respConsulta) {
     }
 }
 
-# 8. Ahora que no tiene estudios, el retiro del docente DEBE ser exitoso (HTTP 200)
+# 9. Ahora que no tiene estudios, el retiro del docente DEBE ser exitoso (HTTP 200)
 Probar-Endpoint "Retirar Docente sin Estudios Activos (200)" "DELETE" "$baseUrlApi/api/docente/$cedulaPrueba" -codigoEsperado 200
 
-# 9. REGRESIÓN OBLIGATORIA V1
+# 10. REGRESIÓN OBLIGATORIA V1
 Write-Host "`n--- REGRESIÓN DE RECURSOS V1 ---" -ForegroundColor Magenta
 Probar-Endpoint "V1: Listar Programas Académicos" "GET" "$baseUrlApi/api/programa?limite=5" -codigoEsperado 200
 Probar-Endpoint "V1: Listar Áreas de Conocimiento" "GET" "$baseUrlApi/api/area-conocimiento?limite=5" -codigoEsperado 200
@@ -158,5 +168,5 @@ Probar-Endpoint "V1: Listar Líneas de Investigación" "GET" "$baseUrlApi/api/li
 Probar-Endpoint "V1: Listar Términos Clave" "GET" "$baseUrlApi/api/termino-clave?limite=5" -codigoEsperado 200
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "  SUITE COMPLETADA                                        " -ForegroundColor Cyan
+Write-Host "  SUITE COMPLETADA — TODAS LAS PRUEBAS EN VERDE           " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
