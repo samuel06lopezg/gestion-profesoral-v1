@@ -184,11 +184,31 @@ function obtenerServicioRolUsuario(PDO $conexion): ServicioRolUsuario {
 // -----------------------------------------------------------------------------
 
 function obtenerConexion(): PDO {
-    $host = getenv('MYSQL_HOST') ?: 'mariadb';
-    $puerto = getenv('MYSQL_PORT') ?: '3306';
-    $base = getenv('MYSQL_DATABASE') ?: 'gestion_profesoral';
-    $usuario = getenv('MYSQL_USER') ?: 'root';
-    $clave = (string) getenv('MYSQL_PASSWORD');
+    // Si existe archivo .env local en la raíz o directorio superior, cargar variables
+    $posiblesEnv = [__DIR__ . '/../../.env', __DIR__ . '/../.env', __DIR__ . '/.env'];
+    foreach ($posiblesEnv as $archivoEnv) {
+        if (file_exists($archivoEnv)) {
+            $lineas = @file($archivoEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+            foreach ($lineas as $linea) {
+                $linea = trim($linea);
+                if ($linea === '' || str_starts_with($linea, '#') || !str_contains($linea, '=')) continue;
+                [$k, $v] = explode('=', $linea, 2);
+                $k = trim($k);
+                $v = trim($v);
+                if (!getenv($k)) {
+                    putenv("$k=$v");
+                    $_ENV[$k] = $v;
+                }
+            }
+            break;
+        }
+    }
+
+    $host = getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: 'mariadb';
+    $puerto = getenv('MYSQL_PORT') ?: getenv('DB_PORT') ?: '3306';
+    $base = getenv('MYSQL_DATABASE') ?: getenv('DB_NOMBRE') ?: 'gestion_profesoral';
+    $usuario = getenv('MYSQL_USER') ?: getenv('DB_USUARIO') ?: 'root';
+    $clave = (string) (getenv('MYSQL_PASSWORD') ?: getenv('DB_CLAVE') ?: '');
 
     return new PDO(
         "mysql:host={$host};port={$puerto};dbname={$base};charset=utf8mb4",

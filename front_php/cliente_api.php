@@ -8,6 +8,26 @@ declare(strict_types=1);
 
 function obtenerUrlApi(): string
 {
+    if (!getenv('API_BASE_URL')) {
+        $posiblesEnv = [__DIR__ . '/../.env', __DIR__ . '/.env'];
+        foreach ($posiblesEnv as $archivoEnv) {
+            if (file_exists($archivoEnv)) {
+                $lineas = @file($archivoEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+                foreach ($lineas as $linea) {
+                    $linea = trim($linea);
+                    if ($linea === '' || str_starts_with($linea, '#') || !str_contains($linea, '=')) continue;
+                    [$k, $v] = explode('=', $linea, 2);
+                    $k = trim($k);
+                    $v = trim($v);
+                    if ($k === 'API_BASE_URL') {
+                        putenv("$k=$v");
+                        $_ENV[$k] = $v;
+                        return $v;
+                    }
+                }
+            }
+        }
+    }
     return getenv('API_BASE_URL') ?: 'http://api_gestion:8113';
 }
 
