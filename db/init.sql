@@ -299,7 +299,7 @@ ON DUPLICATE KEY UPDATE `usuario_id` = VALUES(`usuario_id`);
 -- ============================================================
 
 -- area_conocimiento: 218 filas
-INSERT INTO area_conocimiento (id, gran_area, area, disciplina) VALUES
+INSERT IGNORE INTO area_conocimiento (id, gran_area, area, disciplina) VALUES
     ('1A01', 'Ciencias Naturales', 'Matemáticas', 'Matemáticas puras'),
     ('1A02', 'Ciencias Naturales', 'Matemáticas', 'Matemáticas aplicadas'),
     ('1A03', 'Ciencias Naturales', 'Matemáticas', 'Estadística y probabilidades (investigación en metodologías)'),
@@ -532,7 +532,7 @@ INSERT INTO area_conocimiento (id, gran_area, area, disciplina) VALUES
 --     rellenarlas con números creíbles sería peor que dejar el hueco a
 --     la vista. Son NOT NULL, así que un valor hay que poner: se pone
 --     uno que se lea como lo que es.
-INSERT INTO programa (id, nombre, tipo, nivel, fecha_creacion,
+INSERT IGNORE INTO programa (id, nombre, tipo, nivel, fecha_creacion,
                       fecha_cierre, numero_cohortes, cant_graduados,
                       fecha_actualizacion, ciudad, facultad) VALUES
     (10101, 'Administración de Empresas', 'Programa Académico', 'Pregrado', 'sin dato', NULL, 'sin dato', 'sin dato', 'sin dato', 'Bogotá', 101),
@@ -734,7 +734,7 @@ INSERT INTO programa (id, nombre, tipo, nivel, fecha_creacion,
 -- Líneas de investigación
 INSERT INTO `linea_investigacion` (`id`, `nombre`, `descripcion`, `activo`) VALUES
     (1, 'Inteligencia Artificial y Robótica', 'Investigación en modelos de aprendizaje profundo, procesamiento de lenguaje natural y robótica autónoma.', 1),
-    (2, 'Ingeniería de Software y Sistemas Distribuidos', 'Desarrollo de arquitecturas orientadas a servicios, microservicios, DevOps y calidad del software.', 1),
+    (2, 'Ingeniería de Software y Sistemas', 'Desarrollo de arquitecturas orientadas a servicios, microservicios, DevOps y calidad del software.', 1),
     (3, 'Ciberseguridad y Redes de Computadores', 'Seguridad perimetral, criptografía aplicada, análisis forense digital y protocolos de red.', 1),
     (4, 'Ciencia de Datos y Analítica Avanzada', 'Minería de datos, Big Data, análisis predictivo y visualización interactiva.', 1)
 ON DUPLICATE KEY UPDATE `nombre` = VALUES(`nombre`);
