@@ -29,8 +29,8 @@
 -- Total de tablas: 19
 -- =============================================================================
 
-CREATE DATABASE IF NOT EXISTS `gestion_profesoral`;
-USE `gestion_profesoral`;
+-- CREATE DATABASE IF NOT EXISTS `gestion_profesoral`;
+-- USE `gestion_profesoral`;
 
 -- =============================================
 -- TABLAS DEL MÓDULO: GESTIÓN PROFESORAL
