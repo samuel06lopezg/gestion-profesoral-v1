@@ -28,6 +28,76 @@ $soloLectura = !empty($_SESSION['token']) && !in_array('admin', $__roles, true) 
         a[href$="/nuevo"], a[href$="/nueva"], a[href$="/crear"], a[href*="/editar"],
         form[action$="/retirar"], a[href*="retirar-directo"] { display: none !important; }
 <?php endif; ?>
+
+        /* Mejoras estéticas globales para botones, tablas y badges */
+        .table td, .table th {
+            vertical-align: middle !important;
+        }
+        .table th {
+            font-size: 0.88rem;
+            letter-spacing: 0.3px;
+        }
+        .table td.text-center, .table th.text-center {
+            white-space: nowrap !important;
+            width: 1% !important;
+        }
+        .table td.text-center .btn,
+        .table td.text-center form {
+            display: inline-block !important;
+            margin: 1px 3px !important;
+            vertical-align: middle;
+        }
+        .btn {
+            font-weight: 500;
+            border-radius: 5px;
+            transition: all 0.15s ease-in-out;
+        }
+        .btn-sm {
+            padding: 0.3rem 0.65rem;
+            font-size: 0.84rem;
+        }
+        .btn-success {
+            background-color: #198754;
+            border-color: #198754;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+        .btn-success:hover {
+            background-color: #157347;
+            border-color: #146c43;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.18);
+        }
+        .btn-outline-primary {
+            color: #0d6efd;
+            border-color: #0d6efd;
+            background-color: #f8faff;
+        }
+        .btn-outline-primary:hover {
+            color: #ffffff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            box-shadow: 0 2px 4px rgba(13,110,253,0.25);
+        }
+        .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        .btn-outline-danger:hover {
+            color: #ffffff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+            box-shadow: 0 2px 4px rgba(220,53,69,0.25);
+        }
+        .badge {
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.4em 0.65em;
+            border-radius: 4px;
+        }
+        .card {
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
