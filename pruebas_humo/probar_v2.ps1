@@ -4,10 +4,15 @@ $ErrorActionPreference = "Continue"
 $baseUrlApi = "http://localhost:8113"
 $baseUrlFront = "http://localhost:8112"
 
+# v3: la API exige sesión. Se inicia sesión como admin y el token viaja en cada petición.
+$login = Invoke-RestMethod -Uri "$baseUrlApi/api/login" -Method POST -ContentType "application/json" `
+    -Body (@{ username = "admin"; password = "admin123" } | ConvertTo-Json)
+$script:token = $login.token
+
 function Probar-Endpoint($nombre, $metodo, $url, $body = $null, $codigoEsperado = 200) {
     Write-Host "Ejecutando: $nombre [$metodo $url]..." -NoNewline
     try {
-        $headers = @{"Content-Type" = "application/json"}
+        $headers = @{"Content-Type" = "application/json"; "Authorization" = "Bearer $script:token"}
         $params = @{
             Uri = $url
             Method = $metodo

@@ -275,6 +275,25 @@ CREATE TABLE IF NOT EXISTS `rol_usuario` (
     FOREIGN KEY (`rol_id`) REFERENCES `rol`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- Datos semilla para gestión de usuarios (v3)
+INSERT INTO `rol` (`id`, `nombre`, `descripcion`, `activo`) VALUES
+    (1, 'admin', 'Administrador con acceso total a lectura, escritura y gestion de identidades', 1),
+    (2, 'docente', 'Usuario docente con acceso a gestion de informacion academica del modulo', 1),
+    (3, 'consulta', 'Usuario de solo lectura; sin permisos de creacion, modificacion ni retiro', 1)
+ON DUPLICATE KEY UPDATE `nombre` = VALUES(`nombre`);
+
+INSERT INTO `usuario` (`id`, `username`, `password`, `email`, `nombre_completo`, `activo`) VALUES
+    (1, 'admin', '$2y$10$mAumWwmY/KsTXrs1.sUEGeZbAnS859dkSea7ExZ8QeSfejnG/D59i', 'admin@universidad.edu.co', 'Administrador del Sistema', 1),
+    (2, 'docente1', '$2y$10$8FcofMVD97q93zY7ohDure1xF8j87klejGgA8d6s0aNAoc7Als0lO', 'docente1@universidad.edu.co', 'Profesor Carlos Gómez', 1),
+    (3, 'consultor1', '$2y$10$8IV0ytjvNsOGVXcVUxGaUuyZ2q4B7A7Wul7SnDGE61whru.WQLub2', 'consulta@universidad.edu.co', 'Auditor de Consulta', 1)
+ON DUPLICATE KEY UPDATE `username` = VALUES(`username`);
+
+INSERT INTO `rol_usuario` (`usuario_id`, `rol_id`) VALUES
+    (1, 1),
+    (2, 2),
+    (3, 3)
+ON DUPLICATE KEY UPDATE `usuario_id` = VALUES(`usuario_id`);
+
 
 -- DATOS DE REFERENCIA (del Excel del módulo)
 -- ============================================================

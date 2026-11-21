@@ -1,3 +1,9 @@
+<?php
+// Rol de solo lectura (consulta): se ocultan los controles de escritura.
+// La API sigue siendo quien rechaza con 403; esto solo evita mostrar botones inútiles.
+$__roles = array_map('strtolower', (array)($_SESSION['roles'] ?? []));
+$soloLectura = !empty($_SESSION['token']) && !in_array('admin', $__roles, true) && !in_array('docente', $__roles, true);
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,16 +17,26 @@
             display: block;
         }
         .navbar-nav .nav-link {
-            padding-right: 0.9rem;
-            padding-left: 0.9rem;
+            padding-right: 0.8rem;
+            padding-left: 0.8rem;
         }
         .dropdown-menu {
             max-height: 85vh;
             overflow-y: auto;
         }
+<?php if ($soloLectura): ?>
+        a[href$="/nuevo"], a[href$="/nueva"], a[href$="/crear"], a[href*="/editar"],
+        form[action$="/retirar"], a[href*="retirar-directo"] { display: none !important; }
+<?php endif; ?>
     </style>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
+
+<?php
+$usuarioSesion = $_SESSION['usuario'] ?? null;
+$rolesSesion = (array)($_SESSION['roles'] ?? []);
+$esAdmin = in_array('admin', array_map('strtolower', $rolesSesion), true);
+?>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
     <div class="container">
@@ -40,7 +56,7 @@
                 <!-- Versión 1: Catálogos -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-info font-weight-bold" href="#" id="v1Dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        Versión 1: Catálogos
+                        Catálogos (v1)
                     </a>
                     <div class="dropdown-menu" id="v1DropdownMenu" aria-labelledby="v1Dropdown">
                         <h6 class="dropdown-header text-uppercase font-weight-bold text-muted">Parámetros Base</h6>
@@ -55,7 +71,7 @@
                 <!-- Versión 2: Gestión Docente (11 Tablas Completas) -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-warning font-weight-bold" href="#" id="v2Dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        Versión 2: Gestión Docente
+                        Gestión Docente (v2)
                     </a>
                     <div class="dropdown-menu" id="v2DropdownMenu" aria-labelledby="v2Dropdown">
                         <h6 class="dropdown-header text-uppercase font-weight-bold text-primary">Maestro - Detalle Principal</h6>
@@ -78,12 +94,41 @@
                         <a class="dropdown-item" href="/becas">Becas de Estudio</a>
                     </div>
                 </li>
+
+                <!-- Versión 3: Seguridad y Roles (Solo visible para rol Admin) -->
+                <?php if ($esAdmin): ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-success font-weight-bold" href="#" id="v3Dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        Seguridad y Roles (v3)
+                    </a>
+                    <div class="dropdown-menu" id="v3DropdownMenu" aria-labelledby="v3Dropdown">
+                        <h6 class="dropdown-header text-uppercase font-weight-bold text-success">Control de Acceso (Admin)</h6>
+                        <a class="dropdown-item" href="/usuarios"><strong>Usuarios del Sistema</strong></a>
+                        <a class="dropdown-item" href="/roles">Catálogo de Roles</a>
+                    </div>
+                </li>
+                <?php endif; ?>
             </ul>
 
-            <div class="navbar-text text-light small d-none d-md-block">
-                <span class="badge badge-info mr-1">V1 Activa</span>
-                <span class="badge badge-warning">V2 Completa (11 Tablas)</span>
-            </div>
+            <!-- Sección de usuario en sesión y control de acceso -->
+            <ul class="navbar-nav ml-auto align-items-center">
+                <?php if ($usuarioSesion !== null): ?>
+                    <li class="nav-item text-light mr-3 small">
+                        <span class="text-muted">Conectado:</span>
+                        <strong class="text-white"><?php echo htmlspecialchars($usuarioSesion['username'] ?? 'Usuario'); ?></strong>
+                        <?php foreach ($rolesSesion as $rolNombre): ?>
+                            <span class="badge badge-primary ml-1"><?php echo htmlspecialchars($rolNombre); ?></span>
+                        <?php endforeach; ?>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/salir" class="btn btn-outline-danger btn-sm">Cerrar Sesión</a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item">
+                        <a href="/entrar" class="btn btn-success btn-sm font-weight-bold">Iniciar Sesión</a>
+                    </li>
+                <?php endif; ?>
+            </ul>
         </div>
     </div>
 </nav>
@@ -94,7 +139,7 @@
 
 <footer class="footer py-3 bg-white border-top text-center text-muted mt-auto">
     <div class="container">
-        <small>Sistema de Gestión Profesoral y Académica &copy; <?php echo date('Y'); ?> — Proyecto Integrado (V1 y V2 Completa)</small>
+        <small>Sistema de Gestión Profesoral y Académica &copy; <?php echo date('Y'); ?> — v3: Autenticación, JWT y Control de Acceso por Roles</small>
     </div>
 </footer>
 

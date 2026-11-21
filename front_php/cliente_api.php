@@ -11,13 +11,26 @@ function obtenerUrlApi(): string
     return getenv('API_BASE_URL') ?: 'http://api_gestion:8113';
 }
 
+function obtenerCabecerasHttp(bool $conJson = false): array
+{
+    $headers = [];
+    if ($conJson) {
+        $headers[] = 'Content-Type: application/json';
+    }
+    if (session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION['token'])) {
+        $headers[] = 'Authorization: Bearer ' . $_SESSION['token'];
+    }
+    return $headers;
+}
+
 function listar_programas(int $limite = 1000): array
 {
     $url = obtenerUrlApi() . '/api/programa?limite=' . $limite;
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
 
     $respuesta = curl_exec($ch);
@@ -42,7 +55,8 @@ function obtener_programa(int $id): array
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
 
     $respuesta = curl_exec($ch);
@@ -65,8 +79,9 @@ function crear_programa(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
 
     $respuesta = curl_exec($ch);
@@ -85,8 +100,9 @@ function reemplazar_programa(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
 
     $respuesta = curl_exec($ch);
@@ -105,8 +121,9 @@ function actualizar_parcial_programa(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
 
     $respuesta = curl_exec($ch);
@@ -124,7 +141,8 @@ function retirar_programa(int $id): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
 
     $respuesta = curl_exec($ch);
@@ -140,7 +158,7 @@ function retirar_programa(int $id): array
 function listar_redes(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/red?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -158,7 +176,7 @@ function listar_redes(int $limite = 1000): array
 function obtener_red(int $idr): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/red/' . $idr);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -177,8 +195,9 @@ function crear_red(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -194,8 +213,9 @@ function reemplazar_red(int $idr, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -211,8 +231,9 @@ function actualizar_parcial_red(int $idr, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -227,7 +248,8 @@ function retirar_red(int $idr): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -241,7 +263,7 @@ function retirar_red(int $idr): array
 function listar_lineas(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/linea-investigacion?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -259,7 +281,7 @@ function listar_lineas(int $limite = 1000): array
 function obtener_linea(int $id): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/linea-investigacion/' . $id);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -278,8 +300,9 @@ function crear_linea(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -295,8 +318,9 @@ function reemplazar_linea(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -312,8 +336,9 @@ function actualizar_parcial_linea(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -328,7 +353,8 @@ function retirar_linea(int $id): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -343,7 +369,7 @@ function retirar_linea(int $id): array
 function listar_terminos(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/termino-clave?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -361,7 +387,7 @@ function listar_terminos(int $limite = 1000): array
 function obtener_termino(string $termino): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/termino-clave/' . rawurlencode($termino));
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -380,8 +406,9 @@ function crear_termino(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -397,8 +424,9 @@ function reemplazar_termino(string $termino, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -414,8 +442,9 @@ function actualizar_parcial_termino(string $termino, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -430,7 +459,8 @@ function retirar_termino(string $termino): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -444,7 +474,7 @@ function retirar_termino(string $termino): array
 function listar_areas(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/area-conocimiento?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -462,7 +492,7 @@ function listar_areas(int $limite = 1000): array
 function obtener_area(string $id): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/area-conocimiento/' . rawurlencode($id));
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -481,8 +511,9 @@ function crear_area(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -498,8 +529,9 @@ function reemplazar_area(string $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -515,8 +547,9 @@ function actualizar_parcial_area(string $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -531,7 +564,8 @@ function retirar_area(string $id): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -549,7 +583,8 @@ function listar_docentes(int $limite = 1000): array
     $ch = curl_init(obtenerUrlApi() . '/api/docente?limite=' . $limite);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -570,7 +605,8 @@ function obtener_docente(int $cedula): array
     $ch = curl_init(obtenerUrlApi() . '/api/docente/' . $cedula);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -590,8 +626,9 @@ function crear_docente(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -607,8 +644,9 @@ function reemplazar_docente(int $cedula, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -624,8 +662,9 @@ function actualizar_parcial_docente(int $cedula, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -640,7 +679,8 @@ function retirar_docente(int $cedula): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -662,7 +702,8 @@ function listar_estudios_realizados(int $limite = 1000, ?int $docente = null): a
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -683,7 +724,8 @@ function obtener_estudio_realizado(int $id): array
     $ch = curl_init(obtenerUrlApi() . '/api/estudios-realizados/' . $id);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -703,8 +745,9 @@ function crear_estudio_realizado(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -720,8 +763,9 @@ function reemplazar_estudio_realizado(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -737,8 +781,9 @@ function actualizar_parcial_estudio_realizado(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -753,7 +798,8 @@ function retirar_estudio_realizado(int $id): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -771,7 +817,8 @@ function listar_evaluaciones_docente(int $limite = 1000): array
     $ch = curl_init(obtenerUrlApi() . '/api/evaluacion-docente?limite=' . $limite);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -792,7 +839,8 @@ function obtener_evaluacion_docente(int $id): array
     $ch = curl_init(obtenerUrlApi() . '/api/evaluacion-docente/' . $id);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -812,8 +860,9 @@ function crear_evaluacion_docente(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -829,8 +878,9 @@ function reemplazar_evaluacion_docente(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -846,8 +896,9 @@ function actualizar_parcial_evaluacion_docente(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -862,7 +913,8 @@ function retirar_evaluacion_docente(int $id): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -880,7 +932,8 @@ function listar_experiencias(int $limite = 1000): array
     $ch = curl_init(obtenerUrlApi() . '/api/experiencia?limite=' . $limite);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -901,7 +954,8 @@ function obtener_experiencia(int $id): array
     $ch = curl_init(obtenerUrlApi() . '/api/experiencia/' . $id);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -921,8 +975,9 @@ function crear_experiencia(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -938,8 +993,9 @@ function reemplazar_experiencia(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -955,8 +1011,9 @@ function actualizar_parcial_experiencia(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -971,7 +1028,8 @@ function retirar_experiencia(int $id): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -989,7 +1047,8 @@ function listar_reconocimientos(int $limite = 1000): array
     $ch = curl_init(obtenerUrlApi() . '/api/reconocimiento?limite=' . $limite);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1010,7 +1069,8 @@ function obtener_reconocimiento(int $id): array
     $ch = curl_init(obtenerUrlApi() . '/api/reconocimiento/' . $id);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1030,8 +1090,9 @@ function crear_reconocimiento(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1047,8 +1108,9 @@ function reemplazar_reconocimiento(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1064,8 +1126,9 @@ function actualizar_parcial_reconocimiento(int $id, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1080,7 +1143,8 @@ function retirar_reconocimiento(int $id): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1164,7 +1228,7 @@ function retirar_termino_clave(string $termino): array
 function listar_docente_departamentos(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/docente-departamento?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1182,7 +1246,7 @@ function listar_docente_departamentos(int $limite = 1000): array
 function obtener_docente_departamento(int $docente, int $departamento): array
 {
     $ch = curl_init(obtenerUrlApi() . "/api/docente-departamento/{$docente}/{$departamento}");
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1201,8 +1265,9 @@ function crear_docente_departamento(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1218,8 +1283,9 @@ function reemplazar_docente_departamento(int $docente, int $departamento, array 
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1235,8 +1301,9 @@ function actualizar_parcial_docente_departamento(int $docente, int $departamento
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1251,7 +1318,8 @@ function retirar_docente_departamento(int $docente, int $departamento): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1264,7 +1332,7 @@ function retirar_docente_departamento(int $docente, int $departamento): array
 function listar_intereses_futuros(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/intereses-futuros?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1286,8 +1354,9 @@ function crear_interes_futuro(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1302,7 +1371,8 @@ function retirar_interes_futuro(int $docente, string $termino): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1315,7 +1385,7 @@ function retirar_interes_futuro(int $docente, string $termino): array
 function listar_redes_docentes(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/red-docente?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1333,7 +1403,7 @@ function listar_redes_docentes(int $limite = 1000): array
 function obtener_red_docente(int $red, int $docente): array
 {
     $ch = curl_init(obtenerUrlApi() . "/api/red-docente/{$red}/{$docente}");
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1352,8 +1422,9 @@ function crear_red_docente(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1369,8 +1440,9 @@ function reemplazar_red_docente(int $red, int $docente, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1386,8 +1458,9 @@ function actualizar_parcial_red_docente(int $red, int $docente, array $datos): a
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1402,7 +1475,8 @@ function retirar_red_docente(int $red, int $docente): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1415,7 +1489,7 @@ function retirar_red_docente(int $red, int $docente): array
 function listar_estudios_ac(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/estudio-ac?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1437,8 +1511,9 @@ function crear_estudio_ac(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1453,7 +1528,8 @@ function retirar_estudio_ac(int $estudio, string $area): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1466,7 +1542,7 @@ function retirar_estudio_ac(int $estudio, string $area): array
 function listar_apoyos_profesorales(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/apoyo-profesoral?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1484,7 +1560,7 @@ function listar_apoyos_profesorales(int $limite = 1000): array
 function obtener_apoyo_profesoral(int $estudios): array
 {
     $ch = curl_init(obtenerUrlApi() . "/api/apoyo-profesoral/{$estudios}");
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1503,8 +1579,9 @@ function crear_apoyo_profesoral(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1520,8 +1597,9 @@ function reemplazar_apoyo_profesoral(int $estudios, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1537,8 +1615,9 @@ function actualizar_parcial_apoyo_profesoral(int $estudios, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1553,7 +1632,8 @@ function retirar_apoyo_profesoral(int $estudios): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1566,7 +1646,7 @@ function retirar_apoyo_profesoral(int $estudios): array
 function listar_becas(int $limite = 1000): array
 {
     $ch = curl_init(obtenerUrlApi() . '/api/beca?limite=' . $limite);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1584,7 +1664,7 @@ function listar_becas(int $limite = 1000): array
 function obtener_beca(int $estudios): array
 {
     $ch = curl_init(obtenerUrlApi() . "/api/beca/{$estudios}");
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5]);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_HTTPHEADER => obtenerCabecerasHttp(false)]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -1603,8 +1683,9 @@ function crear_beca(array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1620,8 +1701,9 @@ function reemplazar_beca(int $estudios, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1637,8 +1719,9 @@ function actualizar_parcial_beca(int $estudios, array $datos): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'PATCH',
         CURLOPT_POSTFIELDS     => json_encode($datos),
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT        => 5
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
     ]);
     $respuesta = curl_exec($ch);
     $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1653,6 +1736,308 @@ function retirar_beca(int $estudios): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false)
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+
+// =============================================================================
+// V3: AUTENTICACIÓN, GESTIÓN DE USUARIOS Y ROLES (CLIENTE API)
+// =============================================================================
+
+function iniciar_sesion_api(string $username, string $password): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/login');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode(['username' => $username, 'password' => $password]),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function obtener_sesion_api(): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/sesion');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function cerrar_sesion_api(): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/sesion');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+// -----------------------------------------------------------------------------
+// CRUD USUARIOS
+// -----------------------------------------------------------------------------
+
+function listar_usuarios(): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/usuario');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo conectar con el servidor de la API.'];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function obtener_usuario(int $id): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/usuario/{$id}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function crear_usuario(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/usuario');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function actualizar_usuario(int $id, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/usuario/{$id}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PUT',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_usuario(int $id): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/usuario/{$id}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+// -----------------------------------------------------------------------------
+// CRUD ROLES
+// -----------------------------------------------------------------------------
+
+function listar_roles(): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/rol');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($respuesta === false || $codigoHttp === 0) {
+        return ['error' => 'No se pudo conectar con el servidor de la API.'];
+    }
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida del servidor.'];
+}
+
+function obtener_rol(int $id): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/rol/{$id}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function crear_rol(array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/rol');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function actualizar_rol(int $id, array $datos): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/rol/{$id}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'PUT',
+        CURLOPT_POSTFIELDS     => json_encode($datos),
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function retirar_rol(int $id): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/rol/{$id}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+// -----------------------------------------------------------------------------
+// ASIGNACIÓN DE ROLES
+// -----------------------------------------------------------------------------
+
+function listar_roles_usuarios(): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/rol-usuario');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function obtener_roles_usuario(int $usuarioId): array
+{
+    $ch = curl_init(obtenerUrlApi() . "/api/rol-usuario/{$usuarioId}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(false),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $datos = json_decode((string)$respuesta, true);
+    return is_array($datos) ? $datos : ['error' => 'Respuesta no válida.'];
+}
+
+function asignar_rol_usuario(int $usuarioId, int $rolId): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/rol-usuario');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode(['usuario_id' => $usuarioId, 'rol_id' => $rolId]),
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
+        CURLOPT_TIMEOUT        => 5
+    ]);
+    $respuesta = curl_exec($ch);
+    $codigoHttp = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['codigo' => $codigoHttp, 'cuerpo' => json_decode((string)$respuesta, true) ?? []];
+}
+
+function desasignar_rol_usuario(int $usuarioId, int $rolId): array
+{
+    $ch = curl_init(obtenerUrlApi() . '/api/rol-usuario');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST  => 'DELETE',
+        CURLOPT_POSTFIELDS     => json_encode(['usuario_id' => $usuarioId, 'rol_id' => $rolId]),
+        CURLOPT_HTTPHEADER     => obtenerCabecerasHttp(true),
         CURLOPT_TIMEOUT        => 5
     ]);
     $respuesta = curl_exec($ch);

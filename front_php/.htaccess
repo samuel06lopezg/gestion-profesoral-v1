@@ -1,0 +1,18 @@
+# =============================================================================
+# Configuración Apache para Frontend Web de Gestión Profesoral (Alwaysdata / Cloud)
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Si el archivo o directorio existe físicamente (ej: /publico/css/bootstrap.min.css), servirlo
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Redirigir todas las rutas dinámicas al enrutador web index.php
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Seguridad: impedir navegación de directorios
+Options -Indexes
