@@ -117,7 +117,7 @@ try {
     }
 
     // --- Ruta pública: diagnóstico -------------------------------------------
-    if ($ruta === '/') {
+    if ($ruta === '/' || $ruta === '/api') {
         if ($metodo !== 'GET') {
             responderJsonYSalir(405, ['estado' => 405, 'mensaje' => 'Metodo no permitido.']);
         }
