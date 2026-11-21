@@ -28,6 +28,10 @@ function obtenerUrlApi(): string
             }
         }
     }
+    if (!empty($_SERVER['HTTP_HOST'])) {
+        $protocolo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+        return rtrim($protocolo . $_SERVER['HTTP_HOST'], '/');
+    }
     return getenv('API_BASE_URL') ?: 'http://api_gestion:8113';
 }
 
