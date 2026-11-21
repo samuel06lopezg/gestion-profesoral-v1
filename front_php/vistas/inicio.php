@@ -1,48 +1,64 @@
+<?php
+declare(strict_types=1);
+$usuarioSesion = $_SESSION['usuario'] ?? null;
+$rolesSesion = (array)($_SESSION['roles'] ?? []);
+$esAdmin = in_array('admin', array_map('strtolower', $rolesSesion), true);
+?>
+
 <div class="jumbotron bg-white border shadow-sm p-4 p-md-5 mb-4 text-center">
     <h1 class="display-5 font-weight-bold mb-2">Sistema de Gestión Profesoral y Académica</h1>
     <p class="lead text-muted mx-auto" style="max-width: 850px;">
-        Portal institucional integrado. Administra los parámetros curriculares base (Versión 1) o la planta docente completa con sus 11 tablas relacionales y maestro-detalle (Versión 2).
+        Portal institucional integrado. Administra los catálogos base (v1), la planta docente completa con relaciones maestro-detalle (v2) y el control de acceso con autenticación JWT y roles (v3).
     </p>
+
+    <?php if ($usuarioSesion !== null): ?>
+        <hr class="my-3">
+        <div class="d-inline-block text-left bg-light p-3 rounded border">
+            <span class="text-muted">Sesión Activa:</span>
+            <strong class="text-dark"><?php echo htmlspecialchars($usuarioSesion['nombre_completo'] ?? $usuarioSesion['username']); ?></strong>
+            <span class="text-muted small ml-1">(<?php echo htmlspecialchars($usuarioSesion['username']); ?>)</span>
+            <div class="mt-1">
+                <span class="text-muted small">Roles asignados:</span>
+                <?php foreach ($rolesSesion as $r): ?>
+                    <span class="badge badge-success text-uppercase"><?php echo htmlspecialchars($r); ?></span>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
 <div class="row">
     <!-- Opción 1: Versión 1 -->
-    <div class="col-lg-6 mb-4">
+    <div class="col-lg-4 mb-4">
         <div class="card h-100 shadow-sm border-info">
             <div class="card-header bg-info text-white d-flex justify-content-between align-items-center py-3">
-                <h4 class="h5 mb-0 font-weight-bold">Versión 1: Catálogos Académicos</h4>
-                <span class="badge badge-light text-info font-weight-bold">V1 Base</span>
+                <h5 class="mb-0 font-weight-bold">Versión 1: Catálogos</h5>
+                <span class="badge badge-light text-info font-weight-bold">v1 Base</span>
             </div>
             <div class="card-body d-flex flex-column">
-                <p class="text-muted">
-                    Administración de catálogos institucionales, parámetros curriculares, áreas MinCiencias y redes de investigación sin claves foráneas.
+                <p class="text-muted small">
+                    Catálogos institucionales, parámetros curriculares, áreas MinCiencias y redes sin claves foráneas.
                 </p>
-
-                <div class="mb-3">
-                    <a href="/programas" class="btn btn-outline-info btn-block btn-lg font-weight-bold">
-                        Ingresar a Versión 1 (Catálogos) &raquo;
-                    </a>
-                </div>
 
                 <div class="list-group list-group-flush mt-auto border-top pt-2">
                     <a href="/programas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Programas Académicos</strong> <small class="text-muted d-block">Pregrados, posgrados y dependencias</small></span>
+                        <span><strong>Programas Académicos</strong></span>
                         <span class="badge badge-secondary">Ver</span>
                     </a>
                     <a href="/redes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Redes Académicas</strong> <small class="text-muted d-block">Redes y comunidades académicas</small></span>
+                        <span><strong>Redes Académicas</strong></span>
                         <span class="badge badge-secondary">Ver</span>
                     </a>
                     <a href="/lineas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Líneas de Investigación</strong> <small class="text-muted d-block">Líneas de indagación institucionales</small></span>
+                        <span><strong>Líneas de Investigación</strong></span>
                         <span class="badge badge-secondary">Ver</span>
                     </a>
                     <a href="/terminos" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Términos Clave</strong> <small class="text-muted d-block">Descriptores temáticos y palabras clave</small></span>
+                        <span><strong>Términos Clave</strong></span>
                         <span class="badge badge-secondary">Ver</span>
                     </a>
                     <a href="/areas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Áreas de Conocimiento</strong> <small class="text-muted d-block">Campos del saber y áreas científicas</small></span>
+                        <span><strong>Áreas de Conocimiento</strong></span>
                         <span class="badge badge-secondary">Ver</span>
                     </a>
                 </div>
@@ -50,74 +66,104 @@
         </div>
     </div>
 
-    <!-- Opción 2: Versión 2 Completa -->
-    <div class="col-lg-6 mb-4">
+    <!-- Opción 2: Versión 2 -->
+    <div class="col-lg-4 mb-4">
         <div class="card h-100 shadow-sm border-warning">
-            <div class="card-header bg-dark text-warning d-flex justify-content-between align-items-center py-3">
-                <h4 class="h5 mb-0 font-weight-bold">Versión 2: Gestión Docente Completa</h4>
-                <span class="badge badge-warning text-dark font-weight-bold">11 Tablas Integradas</span>
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0 font-weight-bold">Versión 2: Gestión Docente</h5>
+                <span class="badge badge-dark font-weight-bold">v2 11 Tablas</span>
             </div>
             <div class="card-body d-flex flex-column">
-                <p class="text-muted">
-                    Gestión integral de profesores con maestro-detalle atómico por Procedimientos Almacenados, seguimiento, vinculaciones, apoyos y becas.
+                <p class="text-muted small">
+                    Relaciones maestro-detalle y tablas dependientes con integridad referencial e inserción transaccional.
                 </p>
 
-                <div class="mb-3">
-                    <a href="/docentes" class="btn btn-warning btn-block btn-lg font-weight-bold text-dark">
-                        Ingresar a Versión 2 (Docentes) &raquo;
+                <div class="list-group list-group-flush mt-auto border-top pt-2" style="max-height: 290px; overflow-y: auto;">
+                    <a href="/docentes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span><strong>Docentes (Maestro-Detalle)</strong></span>
+                        <span class="badge badge-warning">Ver</span>
+                    </a>
+                    <a href="/estudios" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Estudios Realizados</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/evaluaciones" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Evaluación Docente</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/experiencias" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Experiencia Laboral</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/reconocimientos" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Reconocimientos</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/docente-departamentos" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Docente - Programa</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/intereses-futuros" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Intereses Investigación</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/redes-docentes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Redes Docente</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/estudios-areas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Estudios - Áreas</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/apoyos-profesorales" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Apoyos Profesorales</span>
+                        <span class="badge badge-secondary">Ver</span>
+                    </a>
+                    <a href="/becas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1">
+                        <span>Becas de Estudio</span>
+                        <span class="badge badge-secondary">Ver</span>
                     </a>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="list-group list-group-flush mt-auto border-top pt-2" style="max-height: 480px; overflow-y: auto;">
-                    <!-- Maestro-Detalle -->
-                    <a href="/docentes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 bg-light">
-                        <span><strong>Docentes (Maestro-Detalle)</strong> <small class="text-muted d-block">Planta docente y estudios en transacción atómica (sp_*)</small></span>
-                        <span class="badge badge-warning text-dark">Maestro</span>
-                    </a>
-                    <a href="/estudios" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Estudios Realizados</strong> <small class="text-muted d-block">Títulos académicos con regla de bloqueo de retiro</small></span>
-                        <span class="badge badge-primary">Detalle</span>
-                    </a>
+    <!-- Opción 3: Versión 3 -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm border-success">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0 font-weight-bold">Versión 3: Seguridad y Roles</h5>
+                <span class="badge badge-light text-success font-weight-bold">v3 RBAC</span>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <p class="text-muted small">
+                    Autenticación por JSON Web Token (JWT) artesanal sin dependencias, encriptación BCRYPT y control de permisos por roles.
+                </p>
 
-                    <!-- Seguimiento y Calidad -->
-                    <a href="/evaluaciones" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Evaluación Docente</strong> <small class="text-muted d-block">Calificaciones y periodos semestrales con FK</small></span>
-                        <span class="badge badge-info">CRUD</span>
-                    </a>
-                    <a href="/experiencias" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Experiencia Laboral</strong> <small class="text-muted d-block">Trayectoria en cargos e instituciones con FK</small></span>
-                        <span class="badge badge-secondary">CRUD</span>
-                    </a>
-                    <a href="/reconocimientos" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Reconocimientos</strong> <small class="text-muted d-block">Premios y distinciones académicas con FK</small></span>
-                        <span class="badge badge-dark">CRUD</span>
-                    </a>
-
-                    <!-- Vinculaciones y Beneficios -->
-                    <a href="/docente-departamentos" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Docente - Programa</strong> <small class="text-muted d-block">Vinculación a departamentos y programas</small></span>
-                        <span class="badge badge-success">Asociación</span>
-                    </a>
-                    <a href="/intereses-futuros" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Intereses de Investigación</strong> <small class="text-muted d-block">Puente entre docente y términos clave</small></span>
-                        <span class="badge badge-success">Asociación</span>
-                    </a>
-                    <a href="/redes-docentes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Redes Académicas Docente</strong> <small class="text-muted d-block">Participación institucional en redes científicas</small></span>
-                        <span class="badge badge-success">Asociación</span>
-                    </a>
-                    <a href="/estudios-areas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Estudios - Áreas</strong> <small class="text-muted d-block">Clasificación temática de estudios según MinCiencias</small></span>
-                        <span class="badge badge-success">Asociación</span>
-                    </a>
-                    <a href="/apoyos-profesorales" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Apoyos Profesorales</strong> <small class="text-muted d-block">Financiación institucional por estudio realizado</small></span>
-                        <span class="badge badge-info">Beneficio</span>
-                    </a>
-                    <a href="/becas" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
-                        <span><strong>Becas de Estudio</strong> <small class="text-muted d-block">Registro de becas otorgadas para posgrados</small></span>
-                        <span class="badge badge-info">Beneficio</span>
-                    </a>
+                <div class="list-group list-group-flush mt-auto border-top pt-2">
+                    <?php if ($esAdmin): ?>
+                        <a href="/usuarios" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
+                            <span><strong>Usuarios del Sistema</strong> <small class="text-muted d-block">CRUD de credenciales y roles</small></span>
+                            <span class="badge badge-success">Admin</span>
+                        </a>
+                        <a href="/roles" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2">
+                            <span><strong>Catálogo de Roles</strong> <small class="text-muted d-block">admin, docente, consulta</small></span>
+                            <span class="badge badge-success">Admin</span>
+                        </a>
+                    <?php else: ?>
+                        <div class="list-group-item px-2 text-muted small">
+                            <span class="font-weight-bold">Nivel de Acceso Actual:</span>
+                            <div class="mt-1">
+                                <?php if (in_array('docente', array_map('strtolower', $rolesSesion), true)): ?>
+                                    <span class="badge badge-warning text-uppercase">Docente</span> — Permisos de lectura y escritura en módulos académicos.
+                                <?php elseif (in_array('consulta', array_map('strtolower', $rolesSesion), true)): ?>
+                                    <span class="badge badge-secondary text-uppercase">Consulta</span> — Solo lectura (operaciones de escritura bloqueadas).
+                                <?php else: ?>
+                                    <span class="badge badge-light text-uppercase">Invitado</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

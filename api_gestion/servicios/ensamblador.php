@@ -23,6 +23,11 @@ use ApiGestion\Repositorios\RepositorioEstudioAreaConocimientoMariaDB;
 use ApiGestion\Repositorios\RepositorioApoyoProfesoralMariaDB;
 use ApiGestion\Repositorios\RepositorioBecaMariaDB;
 
+// Repositorios V3 (Seguridad, Usuarios y Roles)
+use ApiGestion\Repositorios\RepositorioUsuarioMariaDB;
+use ApiGestion\Repositorios\RepositorioRolMariaDB;
+use ApiGestion\Repositorios\RepositorioRolUsuarioMariaDB;
+
 // Servicios V1
 use ApiGestion\Servicios\ServicioPrograma;
 use ApiGestion\Servicios\ServicioAreaConocimiento;
@@ -44,6 +49,34 @@ use ApiGestion\Servicios\ServicioRedDocente;
 use ApiGestion\Servicios\ServicioEstudioAreaConocimiento;
 use ApiGestion\Servicios\ServicioApoyoProfesoral;
 use ApiGestion\Servicios\ServicioBeca;
+
+// Servicios V3 (Seguridad, Usuarios y Roles)
+use ApiGestion\Servicios\ServicioSesion;
+use ApiGestion\Servicios\ServicioUsuario;
+use ApiGestion\Servicios\ServicioRol;
+use ApiGestion\Servicios\ServicioRolUsuario;
+
+// Controladores (se instancian aquí para que `new` quede concentrado en el ensamblador)
+use ApiGestion\Controladores\ControladorPrograma;
+use ApiGestion\Controladores\ControladorAreaConocimiento;
+use ApiGestion\Controladores\ControladorTerminoClave;
+use ApiGestion\Controladores\ControladorLineaInvestigacion;
+use ApiGestion\Controladores\ControladorRed;
+use ApiGestion\Controladores\ControladorDocente;
+use ApiGestion\Controladores\ControladorEstudiosRealizados;
+use ApiGestion\Controladores\ControladorEvaluacionDocente;
+use ApiGestion\Controladores\ControladorExperiencia;
+use ApiGestion\Controladores\ControladorReconocimiento;
+use ApiGestion\Controladores\ControladorDocenteDepartamento;
+use ApiGestion\Controladores\ControladorInteresFuturo;
+use ApiGestion\Controladores\ControladorRedDocente;
+use ApiGestion\Controladores\ControladorEstudioAreaConocimiento;
+use ApiGestion\Controladores\ControladorApoyoProfesoral;
+use ApiGestion\Controladores\ControladorBeca;
+use ApiGestion\Controladores\ControladorLogin;
+use ApiGestion\Controladores\ControladorUsuario;
+use ApiGestion\Controladores\ControladorRol;
+use ApiGestion\Controladores\ControladorRolUsuario;
 
 // -----------------------------------------------------------------------------
 // FACTORÍAS V1
@@ -121,4 +154,104 @@ function obtenerServicioApoyoProfesoral(PDO $conexion): ServicioApoyoProfesoral 
 
 function obtenerServicioBeca(PDO $conexion): ServicioBeca {
     return new ServicioBeca(new RepositorioBecaMariaDB($conexion));
+}
+
+// -----------------------------------------------------------------------------
+// FACTORÍAS V3 (SEGURIDAD, USUARIOS Y ROLES)
+// -----------------------------------------------------------------------------
+
+function obtenerServicioSesion(PDO $conexion): ServicioSesion {
+    return new ServicioSesion(new RepositorioUsuarioMariaDB($conexion));
+}
+
+function obtenerServicioUsuario(PDO $conexion): ServicioUsuario {
+    return new ServicioUsuario(new RepositorioUsuarioMariaDB($conexion));
+}
+
+function obtenerServicioRol(PDO $conexion): ServicioRol {
+    return new ServicioRol(new RepositorioRolMariaDB($conexion));
+}
+
+function obtenerServicioRolUsuario(PDO $conexion): ServicioRolUsuario {
+    $repoRolUsuario = new RepositorioRolUsuarioMariaDB($conexion);
+    $repoUsuario = new RepositorioUsuarioMariaDB($conexion);
+    $repoRol = new RepositorioRolMariaDB($conexion);
+    return new ServicioRolUsuario($repoRolUsuario, $repoUsuario, $repoRol);
+}
+
+// -----------------------------------------------------------------------------
+// CONEXIÓN A LA BASE DE DATOS (Artículo 9: credenciales solo desde el entorno)
+// -----------------------------------------------------------------------------
+
+function obtenerConexion(): PDO {
+    // Si existe archivo .env local en la raíz o directorio superior, cargar variables
+    $posiblesEnv = [__DIR__ . '/../../.env', __DIR__ . '/../.env', __DIR__ . '/.env'];
+    foreach ($posiblesEnv as $archivoEnv) {
+        if (file_exists($archivoEnv)) {
+            $lineas = @file($archivoEnv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+            foreach ($lineas as $linea) {
+                $linea = trim($linea);
+                if ($linea === '' || str_starts_with($linea, '#') || !str_contains($linea, '=')) continue;
+                [$k, $v] = explode('=', $linea, 2);
+                $k = trim($k);
+                $v = trim($v);
+                if (!getenv($k)) {
+                    putenv("$k=$v");
+                    $_ENV[$k] = $v;
+                }
+            }
+            break;
+        }
+    }
+
+    $host = getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: 'mariadb';
+    $puerto = getenv('MYSQL_PORT') ?: getenv('DB_PORT') ?: '3306';
+    $base = getenv('MYSQL_DATABASE') ?: getenv('DB_NOMBRE') ?: 'gestion_profesoral';
+    $usuario = getenv('MYSQL_USER') ?: getenv('DB_USUARIO') ?: 'root';
+    $clave = (string) (getenv('MYSQL_PASSWORD') ?: getenv('DB_CLAVE') ?: '');
+
+    return new PDO(
+        "mysql:host={$host};port={$puerto};dbname={$base};charset=utf8mb4",
+        $usuario,
+        $clave,
+        [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ]
+    );
+}
+
+// -----------------------------------------------------------------------------
+// FACTORÍA DE CONTROLADORES (única que ejecuta `new` sobre controladores)
+// -----------------------------------------------------------------------------
+
+/**
+ * Construye el controlador del recurso indicado con su servicio ya inyectado.
+ * Los nombres de recurso son los segmentos de la URL (/api/{recurso}).
+ */
+function obtenerControlador(string $recurso, PDO $c): object {
+    return match ($recurso) {
+        'programa'             => new ControladorPrograma(obtenerServicioPrograma($c)),
+        'area-conocimiento'    => new ControladorAreaConocimiento(obtenerServicioAreaConocimiento($c)),
+        'termino-clave'        => new ControladorTerminoClave(obtenerServicioTerminoClave($c)),
+        'linea-investigacion'  => new ControladorLineaInvestigacion(obtenerServicioLineaInvestigacion($c)),
+        'red'                  => new ControladorRed(obtenerServicioRed($c)),
+        'docente'              => new ControladorDocente(obtenerServicioDocente($c)),
+        'estudios-realizados'  => new ControladorEstudiosRealizados(obtenerServicioEstudiosRealizados($c)),
+        'evaluacion-docente'   => new ControladorEvaluacionDocente(obtenerServicioEvaluacionDocente($c)),
+        'experiencia'          => new ControladorExperiencia(obtenerServicioExperiencia($c)),
+        'reconocimiento'       => new ControladorReconocimiento(obtenerServicioReconocimiento($c)),
+        'docente-departamento' => new ControladorDocenteDepartamento(obtenerServicioDocenteDepartamento($c)),
+        'intereses-futuros'    => new ControladorInteresFuturo(obtenerServicioInteresFuturo($c)),
+        'red-docente'          => new ControladorRedDocente(obtenerServicioRedDocente($c)),
+        'estudio-ac'           => new ControladorEstudioAreaConocimiento(obtenerServicioEstudioAreaConocimiento($c)),
+        'apoyo-profesoral'     => new ControladorApoyoProfesoral(obtenerServicioApoyoProfesoral($c)),
+        'beca'                 => new ControladorBeca(obtenerServicioBeca($c)),
+        'login', 'sesion'      => new ControladorLogin(obtenerServicioSesion($c)),
+        'usuario'              => new ControladorUsuario(obtenerServicioUsuario($c)),
+        'rol'                  => new ControladorRol(obtenerServicioRol($c)),
+        'rol-usuario'          => new ControladorRolUsuario(obtenerServicioRolUsuario($c)),
+        default                => throw new InvalidArgumentException("Recurso desconocido: {$recurso}"),
+    };
 }

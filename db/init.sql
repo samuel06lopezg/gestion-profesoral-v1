@@ -275,12 +275,31 @@ CREATE TABLE IF NOT EXISTS `rol_usuario` (
     FOREIGN KEY (`rol_id`) REFERENCES `rol`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- Datos semilla para gestión de usuarios (v3)
+INSERT INTO `rol` (`id`, `nombre`, `descripcion`, `activo`) VALUES
+    (1, 'admin', 'Administrador con acceso total a lectura, escritura y gestion de identidades', 1),
+    (2, 'docente', 'Usuario docente con acceso a gestion de informacion academica del modulo', 1),
+    (3, 'consulta', 'Usuario de solo lectura; sin permisos de creacion, modificacion ni retiro', 1)
+ON DUPLICATE KEY UPDATE `nombre` = VALUES(`nombre`);
+
+INSERT INTO `usuario` (`id`, `username`, `password`, `email`, `nombre_completo`, `activo`) VALUES
+    (1, 'admin', '$2y$10$mAumWwmY/KsTXrs1.sUEGeZbAnS859dkSea7ExZ8QeSfejnG/D59i', 'admin@universidad.edu.co', 'Administrador del Sistema', 1),
+    (2, 'docente1', '$2y$10$8FcofMVD97q93zY7ohDure1xF8j87klejGgA8d6s0aNAoc7Als0lO', 'docente1@universidad.edu.co', 'Profesor Carlos Gómez', 1),
+    (3, 'consultor1', '$2y$10$8IV0ytjvNsOGVXcVUxGaUuyZ2q4B7A7Wul7SnDGE61whru.WQLub2', 'consulta@universidad.edu.co', 'Auditor de Consulta', 1)
+ON DUPLICATE KEY UPDATE `username` = VALUES(`username`);
+
+INSERT INTO `rol_usuario` (`usuario_id`, `rol_id`) VALUES
+    (1, 1),
+    (2, 2),
+    (3, 3)
+ON DUPLICATE KEY UPDATE `usuario_id` = VALUES(`usuario_id`);
+
 
 -- DATOS DE REFERENCIA (del Excel del módulo)
 -- ============================================================
 
 -- area_conocimiento: 218 filas
-INSERT INTO area_conocimiento (id, gran_area, area, disciplina) VALUES
+INSERT IGNORE INTO area_conocimiento (id, gran_area, area, disciplina) VALUES
     ('1A01', 'Ciencias Naturales', 'Matemáticas', 'Matemáticas puras'),
     ('1A02', 'Ciencias Naturales', 'Matemáticas', 'Matemáticas aplicadas'),
     ('1A03', 'Ciencias Naturales', 'Matemáticas', 'Estadística y probabilidades (investigación en metodologías)'),
@@ -513,7 +532,7 @@ INSERT INTO area_conocimiento (id, gran_area, area, disciplina) VALUES
 --     rellenarlas con números creíbles sería peor que dejar el hueco a
 --     la vista. Son NOT NULL, así que un valor hay que poner: se pone
 --     uno que se lea como lo que es.
-INSERT INTO programa (id, nombre, tipo, nivel, fecha_creacion,
+INSERT IGNORE INTO programa (id, nombre, tipo, nivel, fecha_creacion,
                       fecha_cierre, numero_cohortes, cant_graduados,
                       fecha_actualizacion, ciudad, facultad) VALUES
     (10101, 'Administración de Empresas', 'Programa Académico', 'Pregrado', 'sin dato', NULL, 'sin dato', 'sin dato', 'sin dato', 'Bogotá', 101),
@@ -707,6 +726,145 @@ INSERT INTO programa (id, nombre, tipo, nivel, fecha_creacion,
     (40608, 'Maestría en Psicología Clinica', 'Programa Académico', 'Maestría', 'sin dato', NULL, 'sin dato', 'sin dato', 'sin dato', 'Medellín', 406),
     (40609, 'Maestría en Psicología de las Organizaciones y del Trabajo', 'Programa Académico', 'Maestría', 'sin dato', NULL, 'sin dato', 'sin dato', 'sin dato', 'Medellín', 406),
     (40610, 'Doctorado en Psicología', 'Programa Académico', 'Doctorado', 'sin dato', NULL, 'sin dato', 'sin dato', 'sin dato', 'Medellín', 406);
+
+-- =============================================================================
+-- DATOS SEMILLA V1 Y V2 (Líneas, Términos, Redes, Docentes, Estudios y Vinculaciones)
+-- =============================================================================
+
+-- Líneas de investigación
+INSERT INTO `linea_investigacion` (`id`, `nombre`, `descripcion`, `activo`) VALUES
+    (1, 'Inteligencia Artificial y Robótica', 'Investigación en modelos de aprendizaje profundo, procesamiento de lenguaje natural y robótica autónoma.', 1),
+    (2, 'Ingeniería de Software y Sistemas', 'Desarrollo de arquitecturas orientadas a servicios, microservicios, DevOps y calidad del software.', 1),
+    (3, 'Ciberseguridad y Redes de Computadores', 'Seguridad perimetral, criptografía aplicada, análisis forense digital y protocolos de red.', 1),
+    (4, 'Ciencia de Datos y Analítica Avanzada', 'Minería de datos, Big Data, análisis predictivo y visualización interactiva.', 1)
+ON DUPLICATE KEY UPDATE `nombre` = VALUES(`nombre`);
+
+-- Términos clave
+INSERT INTO `termino_clave` (`termino`, `termino_ingles`, `activo`) VALUES
+    ('Machine Learning', 'Machine Learning', 1),
+    ('Minería de Datos', 'Data Mining', 1),
+    ('Ciberseguridad', 'Cybersecurity', 1),
+    ('Computación en la Nube', 'Cloud Computing', 1),
+    ('Procesamiento de Lenguaje', 'Natural Language Processing', 1),
+    ('Inteligencia Artificial', 'Artificial Intelligence', 1),
+    ('Visión Artificial', 'Computer Vision', 1),
+    ('Big Data', 'Big Data', 1)
+ON DUPLICATE KEY UPDATE `termino` = VALUES(`termino`);
+
+-- Redes académicas
+INSERT INTO `red` (`idr`, `nombre`, `url`, `pais`, `activo`) VALUES
+    (101, 'Red Colombiana de Computación (Redis)', 'https://redis.org.co', 'Colombia', 1),
+    (102, 'Red Iberoamericana de Informática Educativa', 'https://www.ribie.org', 'España', 1),
+    (103, 'IEEE Computer Society Colombia', 'https://ieee.org.co', 'Colombia', 1),
+    (104, 'ACM Special Interest Group on CS Education', 'https://sigcse.org', 'Estados Unidos', 1)
+ON DUPLICATE KEY UPDATE `nombre` = VALUES(`nombre`);
+
+-- Docentes
+INSERT INTO `docente` (
+    `cedula`, `nombres`, `apellidos`, `genero`, `cargo`, `fecha_nacimiento`,
+    `correo`, `telefono`, `url_cvlac`, `fecha_actualizacion`, `escalafon`,
+    `perfil`, `cat_minciencia`, `conv_minciencia`, `nacionalidaad`,
+    `linea_investigacion_principal`, `activo`
+) VALUES
+    (
+        1098765432, 'Carlos Andrés', 'Gómez Restrepo', 'Masculino', 'Profesor Titular', '1980-05-14',
+        'carlos.gomez@universidad.edu.co', '3001234567', 'https://scienti.minciencias.gov.co/cvlac/1098765432',
+        '2026-03-01', 'Titular', 'Doctor en Ingeniería de Sistemas con énfasis en Inteligencia Artificial y Machine Learning. Con más de 12 años de experiencia docente e investigativa.',
+        'Senior', '894', 'Colombiana', 1, 1
+    ),
+    (
+        98765432, 'María Fernanda', 'Morales Ruiz', 'Femenino', 'Profesor Asociado', '1985-11-22',
+        'maria.morales@universidad.edu.co', '3109876543', 'https://scienti.minciencias.gov.co/cvlac/98765432',
+        '2026-02-15', 'Asociado', 'Magíster en Ingeniería de Software y especialista en Arquitectura de Software y DevOps. Investigadora líder en proyectos de modernización institucional.',
+        'Asociado', '894', 'Colombiana', 2, 1
+    ),
+    (
+        1122334455, 'Juan Camilo', 'Valencia Pérez', 'Masculino', 'Profesor Asistente', '1990-08-30',
+        'juan.valencia@universidad.edu.co', '3205557788', 'https://scienti.minciencias.gov.co/cvlac/1122334455',
+        '2026-01-20', 'Asistente', 'Ingeniero de Sistemas y Magíster en Ciberseguridad. Especialista en seguridad informática perimetral, criptografía y auditoría de sistemas.',
+        'Junior', '894', 'Colombiana', 3, 1
+    )
+ON DUPLICATE KEY UPDATE `nombres` = VALUES(`nombres`);
+
+-- Estudios realizados
+INSERT INTO `estudios_realizados` (
+    `id`, `titulo`, `universidad`, `fecha`, `tipo`, `ciudad`,
+    `docente`, `ins_acreditada`, `metodologia`, `perfil_egresado`, `pais`, `activo`
+) VALUES
+    (1, 'Ingeniería de Sistemas', 'Universidad de Antioquia', '2003-12-15', 'Pregrado', 'Medellín', 1098765432, 1, 'Presencial', 'Formación sólida en desarrollo, algoritmia y sistemas de información.', 'Colombia', 1),
+    (2, 'Maestría en Ciencias de la Computación', 'Universidad Nacional de Colombia', '2008-06-20', 'Maestría', 'Medellín', 1098765432, 1, 'Presencial', 'Investigación en optimización y minería de datos.', 'Colombia', 1),
+    (3, 'Doctorado en Informática', 'Universidad Politécnica de Valencia', '2015-11-28', 'Doctorado', 'Valencia', 1098765432, 1, 'Presencial', 'Tesis doctoral en modelos probabilísticos y aprendizaje profundo.', 'España', 1),
+    (4, 'Ingeniería de Sistemas e Informática', 'Universidad Pontificia Bolivariana', '2007-06-18', 'Pregrado', 'Medellín', 98765432, 1, 'Presencial', 'Enfoque en arquitectura de software y gestión de proyectos.', 'Colombia', 1),
+    (5, 'Maestría en Ingeniería de Software', 'Universidad de los Andes', '2012-10-15', 'Maestría', 'Bogotá', 98765432, 1, 'Presencial', 'Investigación en microservicios y sistemas tolerantes a fallos.', 'Colombia', 1),
+    (6, 'Ingeniería de Telecomunicaciones', 'Universidad de San Buenaventura', '2013-12-10', 'Pregrado', 'Medellín', 1122334455, 1, 'Presencial', 'Redes de datos, protocolos y comunicaciones digitales.', 'Colombia', 1),
+    (7, 'Maestría en Seguridad de la Información', 'Universidad de Barcelona', '2018-07-22', 'Maestría', 'Barcelona', 1122334455, 1, 'Virtual', 'Ciberseguridad, análisis forense y ethical hacking.', 'España', 1)
+ON DUPLICATE KEY UPDATE `titulo` = VALUES(`titulo`);
+
+-- Evaluaciones docentes
+INSERT INTO `evaluacion_docente` (`id`, `calificacion`, `semestre`, `docente`, `activo`) VALUES
+    (1, 4.8, '2025-1', 1098765432, 1),
+    (2, 4.9, '2025-2', 1098765432, 1),
+    (3, 4.7, '2025-2', 98765432, 1),
+    (4, 4.6, '2025-2', 1122334455, 1)
+ON DUPLICATE KEY UPDATE `calificacion` = VALUES(`calificacion`);
+
+-- Reconocimientos
+INSERT INTO `reconocimiento` (`id`, `tipo`, `fecha`, `institucion`, `nombre`, `ambito`, `docente`, `activo`) VALUES
+    (1, 'Premio a la Excelencia Investigativa', '2024-11-15', 'Ministerio de Ciencia (Minciencias)', 'Medalla al Mérito Científico', 'Nacional', 1098765432, 1),
+    (2, 'Docente Destacado del Año', '2023-12-01', 'Universidad de San Buenaventura', 'Mención de Honor Docencia', 'Institucional', 98765432, 1)
+ON DUPLICATE KEY UPDATE `nombre` = VALUES(`nombre`);
+
+-- Experiencias
+INSERT INTO `experiecia` (`id`, `nombre_cargo`, `institucion`, `tipo`, `fecha_inicio`, `fecha_fin`, `docente`, `activo`) VALUES
+    (1, 'Profesor Titular e Investigador', 'Universidad de San Buenaventura', 'Docencia Universitaria', '2016-01-15', NULL, 1098765432, 1),
+    (2, 'Líder Técnico de Software', 'Compañía Tecnológica S.A.', 'Profesional', '2012-02-01', '2015-12-31', 98765432, 1),
+    (3, 'Consultor en Ciberseguridad', 'Auditorías y Redes Seguras', 'Profesional', '2018-03-01', NULL, 1122334455, 1)
+ON DUPLICATE KEY UPDATE `nombre_cargo` = VALUES(`nombre_cargo`);
+
+-- Docente - Departamento / Programa
+INSERT INTO `docente_departamento` (`docente`, `departamento`, `dedicacion`, `modalidad`, `fecha_ingreso`, `fecha_salida`, `activo`) VALUES
+    (1098765432, 40502, 'Tiempo Completo', 'Presencial', '2016-01-15', NULL, 1),
+    (98765432, 40502, 'Tiempo Completo', 'Presencial', '2018-07-01', NULL, 1),
+    (1122334455, 40505, 'Medio Tiempo', 'Presencial', '2020-02-01', NULL, 1)
+ON DUPLICATE KEY UPDATE `dedicacion` = VALUES(`dedicacion`);
+
+-- Intereses de investigación
+INSERT INTO `intereses_futuros` (`docente`, `termino_clave`, `activo`) VALUES
+    (1098765432, 'Machine Learning', 1),
+    (1098765432, 'Minería de Datos', 1),
+    (98765432, 'Computación en la Nube', 1),
+    (1122334455, 'Ciberseguridad', 1)
+ON DUPLICATE KEY UPDATE `docente` = VALUES(`docente`);
+
+-- Redes - Docente
+INSERT INTO `red_docente` (`red`, `docente`, `fecha_inicio`, `fecha_fin`, `act_destacadas`, `activo`) VALUES
+    (101, 1098765432, '2018-03-01', 'Vigente', 'Coordinación del comité científico del Congreso Colombiano de Computación.', 1),
+    (102, 98765432, '2020-06-15', 'Vigente', 'Publicación de artículos conjuntos y organización de seminarios virtuales.', 1),
+    (103, 1122334455, '2021-01-10', 'Vigente', 'Miembro activo del capítulo técnico de seguridad de la información.', 1)
+ON DUPLICATE KEY UPDATE `act_destacadas` = VALUES(`act_destacadas`);
+
+-- Estudios - Áreas de conocimiento
+INSERT INTO `estudio_ac` (`estudio`, `area_conocimiento`, `activo`) VALUES
+    (1, '2B04', 1),
+    (2, '1B01', 1),
+    (3, '1B01', 1),
+    (4, '2B04', 1),
+    (5, '2B04', 1),
+    (6, '2B05', 1),
+    (7, '2B04', 1)
+ON DUPLICATE KEY UPDATE `estudio` = VALUES(`estudio`);
+
+-- Apoyos profesorales
+INSERT INTO `apoyo_profesoral` (`estudios`, `con_apoyo`, `institucion`, `tipo`, `activo`) VALUES
+    (3, 1, 'Universidad de San Buenaventura', 'Comisión de estudios remunerada', 1),
+    (5, 1, 'Minciencias', 'Financiación de matrícula y sostenimiento', 1)
+ON DUPLICATE KEY UPDATE `institucion` = VALUES(`institucion`);
+
+-- Becas de estudio
+INSERT INTO `beca` (`estudios`, `tipo`, `institucion`, `fecha_inicio`, `fecha_fin`, `activo`) VALUES
+    (3, 'Beca Doctoral Internacional', 'Fundación Carolina / Banco Santander', '2012-09-01', '2015-10-30', 1),
+    (7, 'Beca de Excelencia Académica', 'Agencia Española de Cooperación', '2017-09-01', '2018-07-01', 1)
+ON DUPLICATE KEY UPDATE `tipo` = VALUES(`tipo`);
 
 -- =============================================================================
 -- PROCEDIMIENTOS ALMACENADOS (V2 — Maestro: docente, Detalle: estudios_realizados)

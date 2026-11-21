@@ -30,6 +30,8 @@ services:
       MYSQL_USER: ${DB_USUARIO}
       MYSQL_PASSWORD: ${DB_CLAVE}
       MYSQL_PORT: 3306
+      JWT_CLAVE: ${JWT_CLAVE:?Defina JWT_CLAVE en el archivo .env}
+      JWT_MINUTOS: ${JWT_MINUTOS:-120}
     depends_on:
       - mariadb
 

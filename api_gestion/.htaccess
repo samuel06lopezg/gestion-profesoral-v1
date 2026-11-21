@@ -1,0 +1,22 @@
+# =============================================================================
+# Configuración Apache para API REST de Gestión Profesoral (Alwaysdata / Cloud)
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Pasar la cabecera Authorization a PHP (Vital para tokens JWT en Apache)
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+    # Si el archivo o directorio existe físicamente, servirlo directamente
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Redirigir todas las demás peticiones al index.php
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Seguridad: impedir navegación de directorios
+Options -Indexes
